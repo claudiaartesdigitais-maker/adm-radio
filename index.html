@@ -5,89 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rádio e TV Nova Cotia</title>
     <style>
-        :root {
-            --primary-color: #004a99; /* Cor azul para combinar com rádio/tv */
-            --bg-color: #f0f2f5;
-            --text-color: #333;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
-
-        header {
-            background: var(--primary-color);
-            color: white;
-            padding: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .player-section {
-            background: white;
-            max-width: 450px;
-            margin: 20px auto;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-
-        .btn-play {
-            display: inline-block;
-            background: #25d366; /* Verde destaque */
-            color: white;
-            padding: 15px 30px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 18px;
-            transition: 0.3s;
-        }
-
-        .btn-play:hover { background: #128c7e; }
-
-        /* Feed de Notícias */
-        .feed-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            padding: 20px;
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        .noticia-card {
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            text-decoration: none;
-            color: var(--text-color);
-            transition: 0.3s;
-            display: flex;
-            flex-direction: column;
-            text-align: left;
-        }
-
+        :root { --primary-color: #004a99; --bg-color: #f0f2f5; }
+        body { font-family: Arial, sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; text-align: center; }
+        header { background: var(--primary-color); color: white; padding: 25px; }
+        .player-section { background: white; max-width: 450px; margin: 20px auto; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .btn-play { display: inline-block; background: #25d366; color: white; padding: 15px 30px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 18px; }
+        .feed-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 20px; max-width: 1100px; margin: 0 auto; }
+        .noticia-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-decoration: none; color: #333; display: flex; flex-direction: column; text-align: left; transition: 0.3s; }
         .noticia-card:hover { transform: translateY(-5px); }
-
         .noticia-thumb { width: 100%; height: 160px; object-fit: cover; }
-
         .noticia-corpo { padding: 15px; }
-
-        .noticia-tipo {
-            font-size: 10px;
-            font-weight: bold;
-            color: var(--primary-color);
-            text-transform: uppercase;
-        }
-
+        .noticia-tipo { font-size: 10px; font-weight: bold; color: var(--primary-color); text-transform: uppercase; }
         .noticia-titulo { font-size: 16px; margin: 5px 0 0 0; line-height: 1.4; }
-
-        footer { padding: 40px; color: #777; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -99,24 +28,18 @@
 
     <div class="player-section">
         <p>Ouça nossa programação ao vivo:</p>
-        <a href="https://radiocotia.smallbio.com.br" target="_blank" class="btn-play">
-            ▶ OUVIR AGORA
-        </a>
+        <a href="https://radiocotia.smallbio.com.br" target="_blank" class="btn-play">▶ OUVIR AGORA</a>
     </div>
 
-    <h2 style="color: var(--primary-color);">Destaques do WhatsApp e YouTube</h2>
+    <h2 style="color: var(--primary-color);">Destaques e Novidades</h2>
     
     <div id="noticias-lista" class="feed-container">
         <p>Carregando novidades...</p>
     </div>
 
-    <footer>
-        © 2026 Rádio e TV Nova Cotia
-    </footer>
-
     <script>
         async function carregarNoticias() {
-            // O link da sua planilha de notícias da Rádio
+            // Este é o link da sua planilha de notícias
             const url = "https://script.google.com/macros/s/AKfycbw8KGfIC6yOJUV3CS2KBFG7u0CUchB-JfvXv8Xe44l3f3vj9zW0WiQzt2eprt2BkYMl/exec";
 
             try {
@@ -132,6 +55,7 @@
                 container.innerHTML = "";
 
                 noticias.forEach(item => {
+                    // Imagem padrão caso não consiga carregar a do YouTube
                     let imagem = "https://via.placeholder.com/400x225/004a99/ffffff?text=Nova+Cotia";
                     
                     if(item.tipo === "VIDEO") {
@@ -146,8 +70,7 @@
                                 <span class="noticia-tipo">${item.tipo === 'VIDEO' ? '▶ VÍDEO' : '📰 NOTÍCIA'}</span>
                                 <h3 class="noticia-titulo">${item.titulo}</h3>
                             </div>
-                        </a>
-                    `;
+                        </a>`;
                 });
             } catch (error) {
                 document.getElementById('noticias-lista').innerHTML = "<p>Erro ao carregar o feed.</p>";
