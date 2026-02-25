@@ -1,1 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Rádio - Postar Notícia</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { color: #004a99; text-align: center; margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input, select, button { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { background: #004a99; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #003366; }
+        #mensagem { text-align: center; font-weight: bold; padding: 10px; display: none; }
+    </style>
+</head>
+<body>
 
+<div class="card">
+    <h2>Postar no Mural</h2>
+    
+    <label>Link da Notícia/Vídeo</label>
+    <input type="text" id="link" placeholder="Cole o link aqui...">
+
+    <label>Título da Notícia</label>
+    <input type="text" id="titulo" placeholder="Digite o título...">
+
+    <label>Tipo de Conteúdo</label>
+    <select id="tipo">
+        <option value="NOTICIA">📰 NOTÍCIA</option>
+        <option value="VIDEO">▶ VÍDEO</option>
+    </select>
+
+    <button id="btnEnviar" onclick="enviarDados()">PUBLICAR AGORA</button>
+    <div id="mensagem"></div>
+</div>
+
+<script>
+    async function enviarDados() {
+        const btn = document.getElementById('btnEnviar');
+        const msg = document.getElementById('mensagem');
+        const urlScript = "https://script.google.com/macros/s/AKfycbyhQWzOQlxZwCyM1SA1vlcUorGVw4H2Sk1J2dNs977SKVIYTV6EyPQfpznDt75oEPg/exec"; // <-- COLOQUE SEU LINK DO APPS SCRIPT AQUI
+
+        const payload = {
+            link: document.getElementById('link').value,
+            titulo: document.getElementById('titulo').value,
+            tipo: document.getElementById('tipo').value
+        };
+
+        if(!payload.link || !payload.titulo) {
+            alert("Preencha todos os campos!");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "Enviando...";
+
+        try {
+            await fetch(urlScript, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            
+            msg.style.display = "block";
+            msg.style.color = "green";
+            msg.innerText = "Sucesso! Publicado no Mural.";
+            
+            // Limpa os campos
+            document.getElementById('link').value = "";
+            document.getElementById('titulo').value = "";
+        } catch (error) {
+            msg.style.display = "block";
+            msg.style.color = "red";
+            msg.innerText = "Erro ao publicar. Tente novamente.";
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "PUBLICAR AGORA";
+        }
+    }
+</script>
+
+</body>
+</html>
