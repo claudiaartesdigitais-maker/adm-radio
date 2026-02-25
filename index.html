@@ -3,36 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rádio e TV Nova Cotia</title>
+    <title>Notícias 24 horas - Nova Cotia</title>
     <style>
         :root { --primary-color: #004a99; --bg-color: #f0f2f5; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; overflow-x: hidden; }
         header { background: var(--primary-color); color: white; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        
         .feed-title { padding-left: 20px; color: var(--primary-color); margin-top: 30px; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .feed-container { 
-            display: flex; 
-            overflow-x: auto; 
-            gap: 15px; 
-            padding: 10px 20px 25px 20px; 
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-        }
-        
+        .feed-container { display: flex; overflow-x: auto; gap: 15px; padding: 10px 20px 25px 20px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
         .feed-container::-webkit-scrollbar { display: none; }
-
-        .noticia-card { 
-            flex: 0 0 280px;
-            background: #fff; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-            text-decoration: none; 
-            color: #333; 
-            scroll-snap-align: start;
-        }
-        
+        .noticia-card { flex: 0 0 280px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-decoration: none; color: #333; scroll-snap-align: start; }
         .noticia-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #ddd; display: block; }
         .noticia-corpo { padding: 12px; }
         .noticia-tipo { font-size: 9px; font-weight: bold; color: var(--primary-color); text-transform: uppercase; display: block; margin-bottom: 5px; }
@@ -43,12 +22,11 @@
 <body>
 
     <header>
-        <h1 style="margin:0; font-size: 1.5em;">Rádio e TV Nova Cotia</h1>
-        <p style="margin:5px 0 0 0; opacity: 0.9; font-size: 0.9em;">Ao Vivo da Nossa Cidade</p>
+        <h1 style="margin:0; font-size: 1.5em;">Notícias 24 horas</h1>
+        <p style="margin:5px 0 0 0; opacity: 0.9; font-size: 0.9em;">Nova Cotia ao vivo para você</p>
     </header>
 
     <h2 class="feed-title">Destaques do Dia</h2>
-    
     <div id="noticias-lista" class="feed-container">
         <p>A carregar novidades...</p>
     </div>
@@ -61,7 +39,9 @@
         }
 
         async function carregarFeed() {
+            // Seu novo link do script
             const url = "https://script.google.com/macros/s/AKfycbxaiOSoeAhlBHnmVqLIeH61uoJdHCJJK2wFKmw16Bh0YZRG-NgqpWFaA3Ytlyprs4Q9/exec";
+            const imgMural = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
 
             try {
                 const response = await fetch(url);
@@ -86,14 +66,16 @@
 
                 noticiasFiltradas.forEach(item => {
                     let imagem = "https://images.unsplash.com/photo-1585241936939-be4099591252?auto=format&fit=crop&w=400&q=80"; 
-                    
-                    if(item.tipo === "VIDEO") {
+                    const link = item.link ? item.link.toLowerCase() : "";
+
+                    // LÓGICA DE IMAGEM
+                    if (item.imagem_personalizada && item.imagem_personalizada.trim() !== "") {
+                        imagem = item.imagem_personalizada;
+                    } else if (link.includes("instagram.com") || link.includes("facebook.com") || link.includes("tiktok.com")) {
+                        imagem = imgMural;
+                    } else if (item.tipo === "VIDEO") {
                         const idVideo = getYouTubeID(item.link);
-                        if(idVideo) {
-                            imagem = `https://img.youtube.com/vi/${idVideo}/mqdefault.jpg`;
-                        } else {
-                            imagem = "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=400&q=80";
-                        }
+                        imagem = idVideo ? `https://img.youtube.com/vi/${idVideo}/mqdefault.jpg` : imgMural;
                     }
 
                     container.innerHTML += `
@@ -102,7 +84,7 @@
                             <div class="noticia-corpo">
                                 <span class="noticia-tipo">${item.tipo === 'VIDEO' ? '▶ VÍDEO' : '📰 NOTÍCIA'}</span>
                                 <h3 class="noticia-titulo">${item.titulo}</h3>
-                                <span class="noticia-hora">Destaque Recente</span>
+                                <span class="noticia-hora">Disponível por 24h</span>
                             </div>
                         </a>`;
                 });
