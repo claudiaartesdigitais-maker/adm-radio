@@ -15,21 +15,19 @@
 
         .feed-title { padding-left: 20px; color: var(--primary-color); margin-top: 30px; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px; }
         
-        /* Ajuste para Feed Horizontal */
         .feed-container { 
             display: flex; 
             overflow-x: auto; 
             gap: 15px; 
             padding: 10px 20px 25px 20px; 
             scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch; /* Suavidade no iOS */
+            -webkit-overflow-scrolling: touch;
         }
         
-        /* Esconde a barra de rolagem em alguns navegadores para ficar mais limpo */
         .feed-container::-webkit-scrollbar { display: none; }
 
         .noticia-card { 
-            flex: 0 0 280px; /* Largura fixa de cada card */
+            flex: 0 0 280px;
             background: #fff; 
             border-radius: 12px; 
             overflow: hidden; 
@@ -37,10 +35,9 @@
             text-decoration: none; 
             color: #333; 
             scroll-snap-align: start;
-            transition: 0.3s; 
         }
         
-        .noticia-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+        .noticia-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #ddd; display: block; }
         .noticia-corpo { padding: 12px; }
         .noticia-tipo { font-size: 9px; font-weight: bold; color: var(--primary-color); text-transform: uppercase; display: block; margin-bottom: 5px; }
         .noticia-titulo { font-size: 15px; margin: 0; line-height: 1.3; font-weight: 600; height: 40px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
@@ -59,13 +56,20 @@
         <a href="https://radiocotia.smallbio.com.br" target="_blank" class="btn-play">▶ OUVIR AGORA</a>
     </div>
 
-    <h2 class="feed-title">Destaques das últimas 24h</h2>
+    <h2 class="feed-title">Destaques do Dia</h2>
     
     <div id="noticias-lista" class="feed-container">
         <p>A carregar novidades...</p>
     </div>
 
     <script>
+        // Função para extrair ID do YouTube de vários formatos de link
+        function getYouTubeID(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
         async function carregarFeed() {
             const url = "https://script.google.com/macros/s/AKfycbwkFRgiHFIr4Ov4yjctYyrID0sLOtQz54tBEj0N3IWAsJ0pDb2z28w9ypzrB2LUBzy0/exec";
 
@@ -74,11 +78,12 @@
                 const dados = await response.json();
                 const container = document.getElementById('noticias-lista');
                 
-                const agora = new Date();
+                const agora = new Date().getTime();
                 const vinteQuatroHoras = 24 * 60 * 60 * 1000;
 
                 const noticiasFiltradas = dados.filter(item => {
-                    const dataPostagem = new Date(item.data);
+                    if (!item.data) return false;
+                    const dataPostagem = new Date(item.data).getTime();
                     return (agora - dataPostagem) < vinteQuatroHoras;
                 });
 
@@ -90,10 +95,15 @@
                 container.innerHTML = "";
 
                 noticiasFiltradas.forEach(item => {
-                    let imagem = "https://via.placeholder.com/400x225/004a99/ffffff?text=Nova+Cotia";
+                    let imagem = "https://images.unsplash.com/photo-1585241936939-be4099591252?auto=format&fit=crop&w=400&q=80"; // Imagem padrão de notícia
+                    
                     if(item.tipo === "VIDEO") {
-                        let idVideo = item.link.includes('v=') ? item.link.split('v=')[1].split('&')[0] : item.link.split('/').pop();
-                        imagem = `https://img.youtube.com/vi/${idVideo}/mqdefault.jpg`;
+                        const idVideo = getYouTubeID(item.link);
+                        if(idVideo) {
+                            imagem = `https://img.youtube.com/vi/${idVideo}/mqdefault.jpg`;
+                        } else {
+                            imagem = "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=400&q=80"; // Imagem padrão para vídeo sem ID
+                        }
                     }
 
                     container.innerHTML += `
@@ -102,12 +112,12 @@
                             <div class="noticia-corpo">
                                 <span class="noticia-tipo">${item.tipo === 'VIDEO' ? '▶ VÍDEO' : '📰 NOTÍCIA'}</span>
                                 <h3 class="noticia-titulo">${item.titulo}</h3>
-                                <span class="noticia-hora">Disponível por 24h</span>
+                                <span class="noticia-hora">Destaque Recente</span>
                             </div>
                         </a>`;
                 });
             } catch (e) {
-                document.getElementById('noticias-lista').innerHTML = "<p>Erro ao carregar.</p>";
+                document.getElementById('noticias-lista').innerHTML = "<p>Erro ao carregar o feed.</p>";
             }
         }
         window.onload = carregarFeed;
