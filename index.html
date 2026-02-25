@@ -3,50 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rádio Aroma de Lavanda</title>
+    <title>Rádio e TV Nova Cotia</title>
     <style>
         :root {
-            --primary-color: #6a1b9a;
-            --accent-color: #ba68c8;
-            --bg-color: #f5f5f7;
+            --primary-color: #004a99; /* Cor azul para combinar com rádio/tv */
+            --bg-color: #f0f2f5;
             --text-color: #333;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-color);
             margin: 0;
             padding: 0;
+            text-align: center;
         }
 
         header {
             background: var(--primary-color);
             color: white;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
-        /* Player Section */
-        .player-container {
+        .player-section {
             background: white;
-            max-width: 500px;
+            max-width: 450px;
             margin: 20px auto;
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
+
+        .btn-play {
+            display: inline-block;
+            background: #25d366; /* Verde destaque */
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+
+        .btn-play:hover { background: #128c7e; }
 
         /* Feed de Notícias */
-        .feed-titulo {
-            text-align: center;
-            color: var(--primary-color);
-            margin-top: 40px;
-            font-size: 24px;
-        }
-
         .feed-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -58,91 +61,62 @@
 
         .noticia-card {
             background: #fff;
-            border-radius: 15px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             text-decoration: none;
             color: var(--text-color);
+            transition: 0.3s;
             display: flex;
             flex-direction: column;
+            text-align: left;
         }
 
-        .noticia-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
+        .noticia-card:hover { transform: translateY(-5px); }
 
-        .noticia-thumb {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            background: #eee;
-        }
+        .noticia-thumb { width: 100%; height: 160px; object-fit: cover; }
 
-        .noticia-corpo {
-            padding: 15px;
-            flex-grow: 1;
-        }
+        .noticia-corpo { padding: 15px; }
 
         .noticia-tipo {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
             color: var(--primary-color);
             text-transform: uppercase;
-            display: block;
-            margin-bottom: 8px;
         }
 
-        .noticia-titulo {
-            font-size: 17px;
-            margin: 0;
-            line-height: 1.4;
-            font-weight: 600;
-        }
+        .noticia-titulo { font-size: 16px; margin: 5px 0 0 0; line-height: 1.4; }
 
-        footer {
-            text-align: center;
-            padding: 30px;
-            color: #888;
-            font-size: 12px;
-        }
-
-        /* Responsividade para celular */
-        @media (max-width: 600px) {
-            .feed-container { padding: 10px; }
-            .noticia-card { margin-bottom: 10px; }
-        }
+        footer { padding: 40px; color: #777; font-size: 12px; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Aroma de Lavanda Rádio 📻</h1>
-        <p>A trilha sonora do seu dia</p>
+        <h1>Rádio e TV Nova Cotia 📻📺</h1>
+        <p>A voz e a imagem da nossa região</p>
     </header>
 
-    <div class="player-container">
-        <h3>Ouvindo Agora 🎵</h3>
-        <audio controls style="width: 100%;">
-            <source src="LINK_DO_SEU_STREAMING_AQUI" type="audio/mpeg">
-            Seu navegador não suporta áudio online.
-        </audio>
+    <div class="player-section">
+        <p>Ouça nossa programação ao vivo:</p>
+        <a href="https://radiocotia.smallbio.com.br" target="_blank" class="btn-play">
+            ▶ OUVIR AGORA
+        </a>
     </div>
 
-    <h2 class="feed-titulo">Destaques e Novidades ✨</h2>
+    <h2 style="color: var(--primary-color);">Destaques do WhatsApp e YouTube</h2>
     
     <div id="noticias-lista" class="feed-container">
-        <p style="text-align: center; grid-column: 1/-1;">Carregando as últimas notícias...</p>
+        <p>Carregando novidades...</p>
     </div>
 
     <footer>
-        © 2026 Rádio Aroma de Lavanda | Lavanderia & Entretenimento
+        © 2026 Rádio e TV Nova Cotia
     </footer>
 
     <script>
         async function carregarNoticias() {
-            // Seu novo link da planilha de notícias
+            // O link da sua planilha de notícias da Rádio
             const url = "https://script.google.com/macros/s/AKfycbw8KGfIC6yOJUV3CS2KBFG7u0CUchB-JfvXv8Xe44l3f3vj9zW0WiQzt2eprt2BkYMl/exec";
 
             try {
@@ -151,30 +125,23 @@
                 const container = document.getElementById('noticias-lista');
 
                 if (!noticias || noticias.length === 0) {
-                    container.innerHTML = "<p style='text-align:center; grid-column: 1/-1;'>Nenhuma novidade no momento. Volte logo!</p>";
+                    container.innerHTML = "<p>Nenhuma notícia enviada recentemente.</p>";
                     return;
                 }
 
-                container.innerHTML = ""; // Limpa o carregando
+                container.innerHTML = "";
 
                 noticias.forEach(item => {
-                    // Imagem padrão caso não seja vídeo
-                    let imagem = "https://images.unsplash.com/photo-1510070112810-d4e9a46d9e91?w=500&q=80";
+                    let imagem = "https://via.placeholder.com/400x225/004a99/ffffff?text=Nova+Cotia";
                     
-                    // Se for vídeo do YouTube, extrai a thumbnail
                     if(item.tipo === "VIDEO") {
-                        let idVideo = "";
-                        if(item.link.includes('v=')) {
-                            idVideo = item.link.split('v=')[1].split('&')[0];
-                        } else {
-                            idVideo = item.link.split('/').pop();
-                        }
+                        let idVideo = item.link.includes('v=') ? item.link.split('v=')[1].split('&')[0] : item.link.split('/').pop();
                         imagem = `https://img.youtube.com/vi/${idVideo}/mqdefault.jpg`;
                     }
 
                     container.innerHTML += `
                         <a href="${item.link}" target="_blank" class="noticia-card">
-                            <img src="${imagem}" class="noticia-thumb" alt="Miniatura">
+                            <img src="${imagem}" class="noticia-thumb">
                             <div class="noticia-corpo">
                                 <span class="noticia-tipo">${item.tipo === 'VIDEO' ? '▶ VÍDEO' : '📰 NOTÍCIA'}</span>
                                 <h3 class="noticia-titulo">${item.titulo}</h3>
@@ -183,12 +150,9 @@
                     `;
                 });
             } catch (error) {
-                console.error("Erro ao buscar notícias:", error);
-                document.getElementById('noticias-lista').innerHTML = "<p style='text-align:center; grid-column: 1/-1;'>Ops! Tivemos um problema ao carregar as notícias.</p>";
+                document.getElementById('noticias-lista').innerHTML = "<p>Erro ao carregar o feed.</p>";
             }
         }
-
-        // Inicia a busca assim que a página carrega
         window.onload = carregarNoticias;
     </script>
 </body>
