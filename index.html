@@ -33,6 +33,7 @@
 
     <script>
         function getYouTubeID(url) {
+            if (!url) return null;
             const regExp = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/|live\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/;
             const match = url.match(regExp);
             return (match && match[1].length === 11) ? match[1] : null;
@@ -47,38 +48,39 @@
                 const dados = await response.json();
                 const container = document.getElementById('noticias-lista');
                 
-                const agora = new Date().getTime();
-                const vinteQuatroHoras = 24 * 60 * 60 * 1000;
-
-                const noticiasFiltradas = dados.filter(item => {
-                    if (!item.data) return false;
-                    const dataPostagem = new Date(item.data).getTime();
-                    return (agora - dataPostagem) < vinteQuatroHoras;
-                });
-
-                const exibir = noticiasFiltradas.length > 0 ? noticiasFiltradas : dados.slice(0, 8);
+                // Exibe os 12 itens mais recentes
+                const exibir = dados.slice(0, 12);
                 container.innerHTML = "";
 
                 exibir.forEach(item => {
-                    const linkOriginal = item.link || "";
+                    const linkOriginal = (item.link || "").trim();
                     const linkLower = linkOriginal.toLowerCase();
                     const idYoutube = getYouTubeID(linkOriginal);
-                    const tipoNaPlanilha = (item.tipo || "").toUpperCase();
+                    const tipoPlanilha = (item.tipo || "").toUpperCase();
                     
                     let imagem = "";
-                    // RESPEITA O SELO DA PLANILHA
-                    let selo = tipoNaPlanilha === 'VIDEO' ? '▶ VÍDEO' : '📰 NOTÍCIA';
+                    let selo = tipoPlanilha === 'VIDEO' ? '▶ VÍDEO' : '📰 NOTÍCIA';
 
-                    // LÓGICA DE IMAGEM CORRIGIDA
+                    // 1. PRIORIDADE: Imagem manual da planilha
                     if (item.imagem_personalizada && item.imagem_personalizada.trim() !== "") {
                         imagem = item.imagem_personalizada;
                     } 
+                    // 2. YOUTUBE: Busca capa automática
                     else if (idYoutube) {
-                        imagem = `https://img.youtube.com/vi/${idYoutube}/hqdefault.jpg`;
+                        imagem = "https://img.youtube.com/vi/" + idYoutube + "/hqdefault.jpg";
+                        selo = "▶ VÍDEO";
                     }
-                    else if (linkLower.includes("facebook.com") || linkLower.includes("fb.watch") || linkLower.includes("instagram.com") || linkLower.includes("tiktok.com")) {
+                    // 3. REDES SOCIAIS (Incluso o link de share do Facebook): Mural
+                    else if (linkLower.includes("facebook.com") || 
+                             linkLower.includes("fb.watch") || 
+                             linkLower.includes("fb.com") || 
+                             linkLower.includes("share/v/") || 
+                             linkLower.includes("instagram.com") || 
+                             linkLower.includes("tiktok.com")) {
                         imagem = imgMural;
+                        selo = "▶ VÍDEO";
                     }
+                    // 4. NOTÍCIA (Sites em geral): Imagem padrão
                     else {
                         imagem = "https://images.unsplash.com/photo-1585241936939-be4099591252?auto=format&fit=crop&w=400&q=80";
                     }
@@ -94,7 +96,7 @@
                         </a>`;
                 });
             } catch (e) {
-                container.innerHTML = "<p style='padding-left:20px;'>Erro ao carregar.</p>";
+                container.innerHTML = "<p style='padding-left:20px;'>Erro ao carregar o feed.</p>";
             }
         }
         window.onload = carregarFeed;
