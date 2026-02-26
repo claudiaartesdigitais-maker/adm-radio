@@ -6,66 +6,12 @@
     <title>Notícias 24 horas - Nova Cotia</title>
     <style>
         :root { --primary-color: #004a99; --bg-color: #f0f2f5; }
-        
-        html, body { 
-            overflow: hidden; 
-            width: 100%; 
-            height: 100%; 
-            margin: 0; 
-            padding: 0;
-            background-color: var(--bg-color);
-            position: fixed;
-            display: flex;
-            flex-direction: column;
-        }
-
-        header { 
-            background: var(--primary-color); 
-            color: white; 
-            padding: 12px 5px; 
-            text-align: center; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            width: 100%;
-            flex-shrink: 0;
-        }
-        
-        .feed-title { 
-            padding-left: 20px; 
-            color: var(--primary-color); 
-            margin: 15px 0 5px 0; 
-            font-size: 1em; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-            flex-shrink: 0;
-        }
-        
-        .feed-container { 
-            display: flex; 
-            overflow-x: auto; 
-            overflow-y: hidden;
-            gap: 15px; 
-            padding: 5px 20px 20px 20px; 
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            width: 100%;
-            box-sizing: border-box;
-            flex-grow: 1;
-        }
-        
+        html, body { overflow: hidden; width: 100%; height: 100%; margin: 0; padding: 0; background-color: var(--bg-color); position: fixed; display: flex; flex-direction: column; }
+        header { background: var(--primary-color); color: white; padding: 12px 5px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); width: 100%; flex-shrink: 0; }
+        .feed-title { padding-left: 20px; color: var(--primary-color); margin: 15px 0 5px 0; font-size: 1em; text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0; }
+        .feed-container { display: flex; overflow-x: auto; overflow-y: hidden; gap: 15px; padding: 5px 20px 20px 20px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; width: 100%; box-sizing: border-box; flex-grow: 1; }
         .feed-container::-webkit-scrollbar { display: none; }
-
-        .noticia-card { 
-            flex: 0 0 260px; 
-            background: #fff; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-            text-decoration: none; 
-            color: #333; 
-            scroll-snap-align: start;
-            height: fit-content;
-        }
-        
+        .noticia-card { flex: 0 0 260px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-decoration: none; color: #333; scroll-snap-align: start; height: fit-content; }
         .noticia-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #ddd; display: block; border: none; }
         .noticia-corpo { padding: 10px; }
         .noticia-tipo { font-size: 9px; font-weight: bold; color: var(--primary-color); text-transform: uppercase; display: block; margin-bottom: 3px; }
@@ -87,9 +33,10 @@
 
     <script>
         function getYouTubeID(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            // Regex atualizada para pegar links de Live, Shorts e Watch
+            const regExp = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/|live\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/;
             const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
+            return (match && match[1].length === 11) ? match[1] : null;
         }
 
         async function carregarFeed() {
@@ -118,25 +65,27 @@
                 container.innerHTML = "";
 
                 noticiasFiltradas.forEach(item => {
-                    const linkOriginal = item.link ? item.link : "";
+                    const linkOriginal = item.link || "";
                     const linkLower = linkOriginal.toLowerCase();
                     const idYoutube = getYouTubeID(linkOriginal);
                     
-                    // Imagem padrão
-                    let imagem = "https://images.unsplash.com/photo-1585241936939-be4099591252?auto=format&fit=crop&w=400&q=80"; 
+                    let imagem = "";
 
-                    // LÓGICA DE PRIORIDADE:
-                    // 1. Imagem Personalizada
+                    // 1. SE TIVER IMAGEM NA PLANILHA (Manda em tudo)
                     if (item.imagem_personalizada && item.imagem_personalizada.trim() !== "") {
                         imagem = item.imagem_personalizada;
                     } 
-                    // 2. Se for YouTube, traz a capa do vídeo
+                    // 2. SE FOR YOUTUBE (Busca capa automática)
                     else if (idYoutube) {
-                        imagem = `https://img.youtube.com/vi/${idYoutube}/maxresdefault.jpg`;
+                        imagem = `https://img.youtube.com/vi/${idYoutube}/hqdefault.jpg`;
                     }
-                    // 3. Se for Redes Sociais, traz o Mural
+                    // 3. SE FOR REDE SOCIAL (Facebook, Insta, TikTok) E NÃO TIVER IMAGEM NA PLANILHA
                     else if (linkLower.includes("facebook.com") || linkLower.includes("fb.watch") || linkLower.includes("instagram.com") || linkLower.includes("tiktok.com")) {
                         imagem = imgMural;
+                    }
+                    // 4. SE FOR NOTÍCIA NORMAL (Links de sites) E NÃO TIVER IMAGEM, USA PADRÃO DE NOTÍCIA
+                    else {
+                        imagem = "https://images.unsplash.com/photo-1585241936939-be4099591252?auto=format&fit=crop&w=400&q=80";
                     }
 
                     container.innerHTML += `
@@ -144,7 +93,7 @@
                             <img src="${imagem}" class="noticia-thumb" onerror="this.src='${imgMural}'">
                             <div class="noticia-corpo">
                                 <span class="noticia-tipo">${idYoutube ? '▶ VÍDEO' : '📰 NOTÍCIA'}</span>
-                                <h3 class="noticia-titulo">${item.titulo}</h3>
+                                <h3 class="noticia-titulo">${item.titulo || 'Sem título'}</h3>
                                 <span class="noticia-hora">Destaque Recente</span>
                             </div>
                         </a>`;
