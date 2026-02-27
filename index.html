@@ -2,109 +2,54 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Notícias 24 horas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notícias 24 horas - Nova Cotia</title>
     <style>
-        :root { --primary-color: #004a99; }
+        :root { --primary-color: #004a99; --bg-color: #f0f2f5; }
+        body { font-family: sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); }
+        header { background: var(--primary-color); color: white; padding: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .feed-title { padding: 15px 20px 5px 20px; color: var(--primary-color); font-size: 1.1em; text-transform: uppercase; font-weight: bold; }
         
-        /* FUNDO TRANSPARENTE E SEM TRAVAS */
-        html, body { 
-            width: 100%; 
-            margin: 0; 
-            padding: 0; 
-            background-color: transparent !important; /* Torna o fundo invisível */
-            display: flex; 
-            flex-direction: column;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        header { 
-            background: var(--primary-color); 
-            color: white; 
-            padding: 8px 0; 
-            text-align: center; 
-            width: 100%; 
-            flex-shrink: 0;
-        }
-
-        .feed-title { 
-            padding-left: 20px; 
-            color: var(--primary-color); 
-            margin: 10px 0 5px 0; 
-            font-size: 0.9em; 
-            text-transform: uppercase; 
-            font-weight: bold;
-        }
-
-        /* CONTAINER DE NOTÍCIAS */
+        /* Container de Arraste Lateral */
         .feed-container { 
             display: flex; 
             overflow-x: auto; 
-            overflow-y: hidden; 
             gap: 15px; 
-            padding: 5px 20px 20px 20px; 
-            scroll-snap-type: x mandatory; 
+            padding: 10px 20px 20px 20px; 
             -webkit-overflow-scrolling: touch; 
-            width: 100%; 
-            box-sizing: border-box;
-            touch-action: pan-x; /* Libera o arraste horizontal */
         }
-
         .feed-container::-webkit-scrollbar { display: none; }
 
-        /* CARD TOTALMENTE CLICÁVEL */
         .noticia-card { 
-            flex: 0 0 250px; 
-            background: #fff; 
+            flex: 0 0 260px; 
+            background: white; 
             border-radius: 12px; 
             overflow: hidden; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
             text-decoration: none; 
             color: #333; 
-            scroll-snap-align: start; 
-            height: 230px; 
-            display: block; 
-            position: relative; /* Garante que o link funcione */
-            cursor: pointer;
         }
-
-        .noticia-thumb { 
-            width: 100%; 
-            height: 140px; 
-            object-fit: cover; 
-            display: block; 
-            pointer-events: none; /* Deixa o clique passar para o link do card */
-        }
-
-        .noticia-corpo { padding: 10px; }
-        .noticia-tipo { font-size: 9px; font-weight: bold; color: var(--primary-color); text-transform: uppercase; }
-        .noticia-titulo { 
-            font-size: 14px; 
-            margin: 3px 0 0 0; 
-            line-height: 1.2; 
-            font-weight: 600; 
-            height: 34px; 
-            overflow: hidden; 
-            display: -webkit-box; 
-            -webkit-line-clamp: 2; 
-            -webkit-box-orient: vertical; 
-        }
-        .noticia-hora { font-size: 9px; color: #999; margin-top: 5px; display: block; }
+        .noticia-thumb { width: 100%; height: 145px; object-fit: cover; display: block; }
+        .noticia-corpo { padding: 12px; }
+        .noticia-tipo { font-size: 10px; font-weight: bold; color: var(--primary-color); text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .noticia-titulo { font-size: 15px; margin: 0; line-height: 1.3; font-weight: 600; height: 40px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .noticia-hora { font-size: 10px; color: #888; margin-top: 8px; display: block; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1 style="margin:0; font-size: 1.2em;">Notícias 24 horas</h1>
+        <h1 style="margin:0; font-size: 1.4em;">Notícias 24 horas</h1>
+        <p style="margin:4px 0 0 0; opacity: 0.9; font-size: 0.8em;">Nova Cotia ao vivo para você</p>
     </header>
 
     <h2 class="feed-title">Destaques do Dia</h2>
     <div id="noticias-lista" class="feed-container">
-        <p style="padding-left: 20px; font-family: sans-serif; font-size: 14px; color: #666;">Carregando destaques...</p>
+        <p style="padding-left: 20px; color: #666;">Carregando destaques...</p>
     </div>
 
     <script>
+        // Função para pegar a ID do YouTube
         function getYouTubeID(url) {
             if (!url) return null;
             const regExp = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/|live\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/;
@@ -121,55 +66,48 @@
                 const dados = await response.json();
                 const container = document.getElementById('noticias-lista');
                 
+                // Filtro de 24 horas
                 const agora = new Date().getTime();
                 const vinteQuatroHoras = 24 * 60 * 60 * 1000;
-
                 const noticiasFiltradas = dados.filter(item => {
                     if (!item.data) return false;
-                    const dataPostagem = new Date(item.data).getTime();
-                    return (agora - dataPostagem) < vinteQuatroHoras;
+                    return (agora - new Date(item.data).getTime()) < vinteQuatroHoras;
                 });
 
                 if (noticiasFiltradas.length === 0) {
-                    container.innerHTML = "<p style='color:#777; padding-left:20px; font-family: sans-serif;'>Sem novidades nas últimas 24h.</p>";
+                    container.innerHTML = "<p style='padding-left: 20px; color: #666;'>Sem novidades nas últimas 24h.</p>";
                     return;
                 }
 
                 container.innerHTML = "";
 
                 noticiasFiltradas.forEach(item => {
-                    const linkOriginal = (item.link || "").trim();
-                    const idYoutube = getYouTubeID(linkOriginal);
-                    const linkLower = linkOriginal.toLowerCase();
+                    const link = (item.link || "").trim();
+                    const idYoutube = getYouTubeID(link);
                     
                     let imagem = "";
-                    let selo = (item.tipo || "").toUpperCase() === 'VIDEO' ? '▶ VÍDEO' : '📰 NOTÍCIA';
-
-                    if (item.imagem_personalizada && item.imagem_personalizada.trim() !== "") {
+                    if (item.imagem_personalizada) {
                         imagem = item.imagem_personalizada;
-                    } 
-                    else if (idYoutube && !linkLower.includes("facebook") && !linkLower.includes("instagram")) {
-                        imagem = "https://img.youtube.com/vi/" + idYoutube + "/hqdefault.jpg";
-                    }
-                    else if (linkLower.includes("facebook") || linkLower.includes("fb.watch") || linkLower.includes("instagram") || linkLower.includes("tiktok")) {
+                    } else if (idYoutube) {
+                        imagem = `https://img.youtube.com/vi/${idYoutube}/hqdefault.jpg`;
+                    } else if (link.includes("facebook") || link.includes("instagram") || link.includes("tiktok")) {
                         imagem = imgMural;
-                    }
-                    else {
+                    } else {
                         imagem = "https://images.unsplash.com/photo-1585241936939-be4099591252?auto=format&fit=crop&w=400&q=80";
                     }
 
                     container.innerHTML += `
-                        <a href="${linkOriginal}" target="_blank" class="noticia-card">
-                            <img src="${imagem}" class="noticia-thumb">
+                        <a href="${link}" target="_blank" class="noticia-card">
+                            <img src="${imagem}" class="noticia-thumb" onerror="this.src='${imgMural}'">
                             <div class="noticia-corpo">
-                                <span class="noticia-tipo">${selo}</span>
+                                <span class="noticia-tipo">${(item.tipo || "Notícia").toUpperCase()}</span>
                                 <h3 class="noticia-titulo">${item.titulo || 'Nova Notícia'}</h3>
-                                <span class="noticia-hora">Destaque Recente</span>
+                                <span class="noticia-hora">Postado recentemente</span>
                             </div>
                         </a>`;
                 });
             } catch (e) {
-                document.getElementById('noticias-lista').innerHTML = "<p style='padding-left:20px; color:#777;'>Erro ao carregar.</p>";
+                document.getElementById('noticias-lista').innerHTML = "<p style='padding-left: 20px;'>Erro ao carregar destaques.</p>";
             }
         }
         window.onload = carregarFeed;
