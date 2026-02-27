@@ -2,42 +2,88 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rádio e TV Nova Cotia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Notícias Nova Cotia</title>
     <style>
         :root { --primary-color: #004a99; --bg-color: #f0f2f5; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; overflow-x: hidden; }
         
-        header { background: var(--primary-color); color: white; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        header { background: var(--primary-color); color: white; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
         
-        .feed-title { text-align: center; color: var(--primary-color); margin-top: 30px; font-size: 1.2em; text-transform: uppercase; letter-spacing: 1px; }
+        .feed-title { padding-left: 20px; color: var(--primary-color); margin: 15px 0 5px 0; font-size: 0.9em; text-transform: uppercase; font-weight: bold; }
         
-        /* Estilo Feed de Notícias */
-        .feed-container { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px; max-width: 600px; margin: 0 auto; }
-        .noticia-card { background: #fff; width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-decoration: none; color: #333; transition: 0.3s; }
-        .noticia-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-bottom: 1px solid #eee; }
-        .noticia-corpo { padding: 15px; }
-        .noticia-tipo { font-size: 10px; font-weight: bold; color: var(--primary-color); text-transform: uppercase; display: block; margin-bottom: 5px; }
-        .noticia-titulo { font-size: 18px; margin: 0; line-height: 1.3; font-weight: 600; }
-        .noticia-hora { font-size: 11px; color: #999; margin-top: 10px; display: block; }
+        /* CONTAINER HORIZONTAL (O SEGREDO DO FEED) */
+        .feed-container { 
+            display: flex; 
+            overflow-x: auto; 
+            overflow-y: hidden;
+            gap: 15px; 
+            padding: 5px 20px 20px 20px; 
+            scroll-snap-type: x mandatory; 
+            -webkit-overflow-scrolling: touch; 
+            width: 100%; 
+            box-sizing: border-box;
+        }
+        
+        /* Esconde a barra de rolagem para ficar mais bonito */
+        .feed-container::-webkit-scrollbar { display: none; }
+
+        /* CARD REDUZIDO PARA FICAR LADO A LADO */
+        .noticia-card { 
+            flex: 0 0 250px; /* Largura fixa de cada card no feed */
+            background: #fff; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1); 
+            text-decoration: none; 
+            color: #333; 
+            scroll-snap-align: start;
+            display: block;
+        }
+
+        .noticia-thumb { 
+            width: 100%; 
+            height: 135px; /* Altura reduzida da imagem */
+            object-fit: cover; 
+            border-bottom: 1px solid #eee; 
+        }
+
+        .noticia-corpo { padding: 10px; }
+        .noticia-tipo { font-size: 9px; font-weight: bold; color: var(--primary-color); text-transform: uppercase; display: block; margin-bottom: 3px; }
+        .noticia-titulo { 
+            font-size: 14px; 
+            margin: 0; 
+            line-height: 1.2; 
+            font-weight: 600; 
+            height: 34px; /* Garante que o título não empurre o card para baixo */
+            overflow: hidden; 
+            display: -webkit-box; 
+            -webkit-line-clamp: 2; 
+            -webkit-box-orient: vertical; 
+        }
+        .noticia-hora { font-size: 9px; color: #999; margin-top: 5px; display: block; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1 style="margin:0; font-size: 1.5em;">Rádio e TV Nova Cotia</h1>
-        <p style="margin:5px 0 0 0; opacity: 0.9; font-size: 0.9em;">Ao Vivo da Nossa Cidade</p>
+        <h1 style="margin:0; font-size: 1.2em;">Notícias 24h</h1>
     </header>
 
-    <h2 class="feed-title">Últimas do Dia</h2>
+    <h2 class="feed-title">Destaques do Dia</h2>
     
     <div id="noticias-lista" class="feed-container">
-        <p>A carregar feed...</p>
+        <p style="font-size: 13px; color: #666;">Carregando destaques...</p>
     </div>
 
     <script>
+        function getYTId(url) {
+            const regExp = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/|live\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[1].length === 11) ? match[1] : null;
+        }
+
         async function carregarFeed() {
-            // URL DA SUA PLANILHA (Script do Google)
             const url = "https://script.google.com/macros/s/AKfycbxaiOSoeAhlBHnmVqLIeH61uoJdHCJJK2wFKmw16Bh0YZRG-NgqpWFaA3Ytlyprs4Q9/exec";
             const imgMural = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
 
@@ -47,7 +93,7 @@
                 const container = document.getElementById('noticias-lista');
                 
                 const agora = new Date();
-                const vinteQuatroHoras = 24 * 60 * 60 * 1000;
+                const vinteQuatroHoras = 86400000;
 
                 const noticiasFiltradas = dados.filter(item => {
                     const dataPostagem = new Date(item.data);
@@ -55,7 +101,7 @@
                 });
 
                 if (noticiasFiltradas.length === 0) {
-                    container.innerHTML = "<p style='color:#777;'>Sem novidades nas últimas 24h.</p>";
+                    container.innerHTML = "<p style='color:#777; font-size: 13px;'>Sem novidades no momento.</p>";
                     return;
                 }
 
@@ -63,13 +109,17 @@
 
                 noticiasFiltradas.forEach(item => {
                     const link = (item.link || "").trim();
-                    let imagem = "https://via.placeholder.com/400x225/004a99/ffffff?text=Nova+Cotia";
+                    const idVideo = getYTId(link);
                     
-                    if(item.tipo === "VIDEO") {
-                        let idVideo = link.includes('v=') ? link.split('v=')[1].split('&')[0] : link.split('/').pop();
-                        imagem = `https://img.youtube.com/vi/${idVideo}/mqdefault.jpg`;
-                    } else if (item.imagem_personalizada) {
+                    let imagem = "";
+                    if (item.imagem_personalizada) {
                         imagem = item.imagem_personalizada;
+                    } else if (idVideo) {
+                        imagem = `https://img.youtube.com/vi/${idVideo}/hqdefault.jpg`;
+                    } else if (link.includes("facebook") || link.includes("instagram") || link.includes("tiktok")) {
+                        imagem = imgMural;
+                    } else {
+                        imagem = "https://images.unsplash.com/photo-1585241936939-be4099591252?auto=format&fit=crop&w=400&q=80";
                     }
 
                     container.innerHTML += `
@@ -78,12 +128,12 @@
                             <div class="noticia-corpo">
                                 <span class="noticia-tipo">${item.tipo === 'VIDEO' ? '▶ VÍDEO' : '📰 NOTÍCIA'}</span>
                                 <h3 class="noticia-titulo">${item.titulo}</h3>
-                                <span class="noticia-hora">Publicado há menos de 24h</span>
+                                <span class="noticia-hora">Destaque Recente</span>
                             </div>
                         </a>`;
                 });
             } catch (e) {
-                document.getElementById('noticias-lista').innerHTML = "<p>Erro ao carregar feed.</p>";
+                document.getElementById('noticias-lista').innerHTML = "<p>Erro ao carregar.</p>";
             }
         }
         window.onload = carregarFeed;
