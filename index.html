@@ -7,37 +7,52 @@
     <style>
         :root { --primary-color: #004a99; --bg-color: #f0f2f5; }
         
-        /* 1. DESTRAVADO O CORPO DA PÁGINA */
+        /* Ajuste para eliminar o espaço em branco inferior */
         html, body { 
             width: 100%; 
-            height: 100%; 
+            height: auto; 
             margin: 0; 
             padding: 0; 
             background-color: var(--bg-color); 
             display: flex; 
             flex-direction: column;
-            overflow-x: hidden; /* Impede a página de balançar para os lados */
+            overflow: hidden; 
         }
 
-        header { background: var(--primary-color); color: white; padding: 12px 5px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); width: 100%; flex-shrink: 0; }
-        .feed-title { padding-left: 20px; color: var(--primary-color); margin: 15px 0 5px 0; font-size: 1em; text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0; }
+        header { 
+            background: var(--primary-color); 
+            color: white; 
+            padding: 10px 5px; /* Reduzido */
+            text-align: center; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15); 
+            width: 100%; 
+            flex-shrink: 0; 
+        }
 
-        /* 2. MELHORIA NO ARRASTE DO CONTAINER (TOUCH) */
+        .feed-title { 
+            padding-left: 20px; 
+            color: var(--primary-color); 
+            margin: 10px 0 5px 0; /* Margem reduzida */
+            font-size: 0.9em; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            flex-shrink: 0; 
+        }
+
         .feed-container { 
             display: flex; 
-            overflow-x: auto; /* Permite rolagem horizontal */
-            overflow-y: hidden; /* Esconde rolagem vertical */
+            overflow-x: auto; 
+            overflow-y: hidden; 
             gap: 15px; 
-            padding: 5px 20px 20px 20px; 
+            padding: 5px 20px 15px 20px; /* Padding inferior reduzido */
             scroll-snap-type: x mandatory; 
-            -webkit-overflow-scrolling: touch; /* Suporte para iPhone */
+            -webkit-overflow-scrolling: touch; 
             width: 100%; 
             box-sizing: border-box; 
-            flex-grow: 1;
-            touch-action: pan-x; /* Diz ao navegador para focar no arraste horizontal */
+            touch-action: pan-x; /* Habilita arraste horizontal */
         }
 
-        .feed-container::-webkit-scrollbar { display: none; } /* Esconde a barra feia */
+        .feed-container::-webkit-scrollbar { display: none; }
 
         .noticia-card { 
             flex: 0 0 260px; 
@@ -51,7 +66,6 @@
             height: fit-content;
         }
 
-        /* 3. PULO DO GATO: pointer-events: none; IMPEDE A IMAGEM DE TRAVAR O DEDO */
         .noticia-thumb { 
             width: 100%; 
             aspect-ratio: 16/9; 
@@ -59,8 +73,8 @@
             background: #ddd; 
             display: block; 
             border: none; 
-            pointer-events: none; /* Navegador ignora toque na foto e foca no arraste */
-            -webkit-user-drag: none; /* Impede de "arrastar" a imagem pra fora */
+            pointer-events: none; /* Importante para não travar o dedo */
+            -webkit-user-drag: none; 
         }
 
         .noticia-corpo { padding: 10px; }
@@ -72,17 +86,16 @@
 <body>
 
     <header>
-        <h1 style="margin:0; font-size: 1.3em;">Notícias 24 horas</h1>
-        <p style="margin:2px 0 0 0; opacity: 0.9; font-size: 0.8em;">Nova Cotia ao vivo para você</p>
+        <h1 style="margin:0; font-size: 1.2em;">Notícias 24 horas</h1>
+        <p style="margin:2px 0 0 0; opacity: 0.9; font-size: 0.75em;">Nova Cotia ao vivo para você</p>
     </header>
 
     <h2 class="feed-title">Destaques do Dia</h2>
     <div id="noticias-lista" class="feed-container">
-        <p style="padding-left: 20px; color: #777;">Carregando destaques...</p>
+        <p style="padding-left: 20px; color: #777; font-family: sans-serif; font-size: 14px;">Carregando destaques...</p>
     </div>
 
     <script>
-        // ... (O script continua igual, só mudei a mensagem de erro lá embaixo também) ...
         function getYouTubeID(url) {
             if (!url) return null;
             const regExp = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/|live\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/;
@@ -109,8 +122,7 @@
                 });
 
                 if (noticiasFiltradas.length === 0) {
-                    // MENSAGEM EM PT-BR
-                    container.innerHTML = "<p style='color:#777; padding-left:20px;'>Sem novidades nas últimas 24h.</p>";
+                    container.innerHTML = "<p style='color:#777; padding-left:20px; font-family: sans-serif; font-size: 14px;'>Sem novidades nas últimas 24h.</p>";
                     return;
                 }
 
@@ -156,8 +168,7 @@
                         </a>`;
                 });
             } catch (e) {
-                // MENSAGEM EM PT-BR
-                document.getElementById('noticias-lista').innerHTML = "<p style='padding-left:20px; color: #777;'>Erro ao carregar os destaques.</p>";
+                document.getElementById('noticias-lista').innerHTML = "<p style='padding-left:20px; color: #777; font-family: sans-serif; font-size: 14px;'>Erro ao carregar os destaques.</p>";
             }
         }
         window.onload = carregarFeed;
