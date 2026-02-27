@@ -3,149 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Notícias 24 horas</title>
+    <title>Notícias</title>
     <style>
-        /* 1. RESET TOTAL PARA ELIMINAR BORDAS BRANCAS */
-        html, body { 
-            margin: 0 !important; 
-            padding: 0 !important; 
-            background: transparent !important; /* Fundo transparente */
-            width: 100%;
-            height: fit-content;
-            overflow: hidden;
-            font-family: sans-serif;
-        }
-
-        /* TÍTULO COLADO NO TOPO */
-        .feed-title { 
-            padding-left: 20px; 
-            color: #004a99; 
-            margin: 10px 0 5px 0; 
-            font-size: 0.9em; 
-            text-transform: uppercase; 
-            font-weight: bold;
-        }
-
-        /* CONTAINER DE ARRASTE */
+        body { margin: 0; padding: 0; background-color: #f0f2f5; font-family: sans-serif; overflow: hidden; }
+        .feed-title { padding: 10px 20px 5px; color: #004a99; font-size: 0.9em; text-transform: uppercase; font-weight: bold; }
         .feed-container { 
             display: flex; 
             overflow-x: auto; 
-            gap: 15px; 
-            padding: 0 20px 15px 20px; 
+            gap: 12px; 
+            padding: 0 20px 15px; 
             -webkit-overflow-scrolling: touch; 
-            width: 100%; 
-            box-sizing: border-box; 
             touch-action: pan-x;
         }
         .feed-container::-webkit-scrollbar { display: none; }
-
-        /* CARD COM Z-INDEX PARA FORÇAR O CLIQUE NO SMALLBIO */
         .noticia-card { 
-            flex: 0 0 250px; 
+            flex: 0 0 240px; 
             background: #fff; 
-            border-radius: 12px; 
+            border-radius: 10px; 
             overflow: hidden; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
             text-decoration: none; 
             color: #333; 
-            height: 220px !important; 
+            height: 220px; 
             display: block;
-            position: relative;
-            z-index: 999999; /* Garante que o link fique acima da moldura do Smallbio */
-            cursor: pointer;
+            cursor: pointer !important;
         }
-
-        .noticia-thumb { 
-            width: 100%; 
-            height: 135px; 
-            object-fit: cover; 
-            display: block;
-            pointer-events: none; /* Deixa o clique passar para o card <a> */
-        }
-
+        .noticia-thumb { width: 100%; height: 130px; object-fit: cover; pointer-events: none; }
         .noticia-corpo { padding: 10px; }
-        .noticia-tipo { font-size: 9px; font-weight: bold; color: #004a99; text-transform: uppercase; }
-        .noticia-titulo { 
-            font-size: 13px; 
-            margin: 4px 0 0 0; 
-            line-height: 1.2; 
-            font-weight: 600; 
-            height: 32px; 
-            overflow: hidden; 
-            display: -webkit-box; 
-            -webkit-line-clamp: 2; 
-            -webkit-box-orient: vertical; 
-        }
+        .noticia-titulo { font-size: 13px; font-weight: 600; line-height: 1.2; height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-top: 5px; }
+        .noticia-tipo { font-size: 9px; color: #004a99; font-weight: bold; text-transform: uppercase; }
     </style>
 </head>
 <body>
-
     <h2 class="feed-title">Destaques do Dia</h2>
-    <div id="noticias-lista" class="feed-container">
-        <p style="padding-left: 20px; font-size: 14px; color: #666;">Carregando destaques...</p>
-    </div>
+    <div id="noticias-lista" class="feed-container"></div>
 
     <script>
-        function getYouTubeID(url) {
-            if (!url) return null;
-            const regExp = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/|live\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[1].length === 11) ? match[1] : null;
-        }
-
-        async function carregarFeed() {
+        async function carregar() {
             const url = "https://script.google.com/macros/s/AKfycbxaiOSoeAhlBHnmVqLIeH61uoJdHCJJK2wFKmw16Bh0YZRG-NgqpWFaA3Ytlyprs4Q9/exec";
-            const imgMural = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
-
             try {
-                const response = await fetch(url);
-                const dados = await response.json();
+                const res = await fetch(url);
+                const dados = await res.json();
                 const container = document.getElementById('noticias-lista');
-                
-                const agora = new Date().getTime();
                 const vinteQuatroHoras = 24 * 60 * 60 * 1000;
+                const agora = new Date().getTime();
 
-                const noticiasFiltradas = dados.filter(item => {
-                    if (!item.data) return false;
-                    return (agora - new Date(item.data).getTime()) < vinteQuatroHoras;
-                });
-
-                if (noticiasFiltradas.length === 0) {
-                    container.innerHTML = "<p style='color:#777; padding-left:20px; font-size: 13px;'>Sem novidades no momento.</p>";
+                const filtradas = dados.filter(item => (agora - new Date(item.data).getTime()) < vinteQuatroHoras);
+                
+                if (filtradas.length === 0) {
+                    container.innerHTML = "<p style='padding:20px; color:#777;'>Sem novidades nas últimas 24h.</p>";
                     return;
                 }
 
-                container.innerHTML = "";
-
-                noticiasFiltradas.forEach(item => {
-                    const link = (item.link || "").trim();
-                    const idYoutube = getYouTubeID(link);
+                container.innerHTML = filtradas.map(item => {
+                    const idYoutube = item.link.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/)?.[1];
+                    let img = item.imagem_personalizada || (idYoutube ? `https://img.youtube.com/vi/${idYoutube}/hqdefault.jpg` : "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png");
                     
-                    let imagem = "";
-                    if (item.imagem_personalizada) {
-                        imagem = item.imagem_personalizada;
-                    } else if (idYoutube) {
-                        imagem = `https://img.youtube.com/vi/${idYoutube}/hqdefault.jpg`;
-                    } else if (link.toLowerCase().includes("facebook") || link.toLowerCase().includes("instagram") || link.toLowerCase().includes("tiktok")) {
-                        imagem = imgMural;
-                    } else {
-                        imagem = "https://images.unsplash.com/photo-1585241936939-be4099591252?auto=format&fit=crop&w=400&q=80";
-                    }
-
-                    container.innerHTML += `
-                        <a href="${link}" target="_blank" class="noticia-card">
-                            <img src="${imagem}" class="noticia-thumb" onerror="this.src='${imgMural}'">
+                    // O segredo está no target="_top" abaixo
+                    return `
+                        <a href="${item.link}" target="_top" class="noticia-card">
+                            <img src="${img}" class="noticia-thumb">
                             <div class="noticia-corpo">
-                                <span class="noticia-tipo">${(item.tipo || "Notícia").toUpperCase()}</span>
-                                <h3 class="noticia-titulo">${item.titulo || 'Nova Notícia'}</h3>
+                                <span class="noticia-tipo">${(item.tipo || 'Notícia').toUpperCase()}</span>
+                                <div class="noticia-titulo">${item.titulo}</div>
                             </div>
                         </a>`;
-                });
-            } catch (e) {
-                document.getElementById('noticias-lista').innerHTML = "<p style='padding-left:20px;'>Erro de conexão.</p>";
-            }
+                }).join('');
+            } catch (e) { console.error(e); }
         }
-        window.onload = carregarFeed;
+        carregar();
     </script>
 </body>
 </html>
