@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Notícias 24 horas - Nova Cotia</title>
+    <title>Notícias 24 horas</title>
     <style>
-        :root { --primary-color: #004a99; --bg-color: #f0f2f5; }
+        :root { --primary-color: #004a99; }
         
-        /* AJUSTE PARA ELIMINAR O VÁCUO BRANCO */
+        /* FUNDO TRANSPARENTE E SEM TRAVAS */
         html, body { 
             width: 100%; 
-            height: auto; 
             margin: 0; 
             padding: 0; 
-            background-color: var(--bg-color); 
+            background-color: transparent !important; /* Torna o fundo invisível */
             display: flex; 
             flex-direction: column;
-            overflow: hidden; /* Mantém a página firme */
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
         header { 
@@ -24,7 +24,6 @@
             color: white; 
             padding: 8px 0; 
             text-align: center; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
             width: 100%; 
             flex-shrink: 0;
         }
@@ -38,25 +37,25 @@
             font-weight: bold;
         }
 
-        /* ÁREA DE ARRASTE - SEM ESPAÇO SOBRANDO */
+        /* CONTAINER DE NOTÍCIAS */
         .feed-container { 
             display: flex; 
             overflow-x: auto; 
             overflow-y: hidden; 
             gap: 15px; 
-            padding: 0 20px 15px 20px; 
+            padding: 5px 20px 20px 20px; 
             scroll-snap-type: x mandatory; 
             -webkit-overflow-scrolling: touch; 
             width: 100%; 
-            box-sizing: border-box; 
-            touch-action: pan-x; /* Libera o arraste no celular */
+            box-sizing: border-box;
+            touch-action: pan-x; /* Libera o arraste horizontal */
         }
 
         .feed-container::-webkit-scrollbar { display: none; }
 
-        /* CARD COM ALTURA TRAVADA E CLICÁVEL */
+        /* CARD TOTALMENTE CLICÁVEL */
         .noticia-card { 
-            flex: 0 0 260px; 
+            flex: 0 0 250px; 
             background: #fff; 
             border-radius: 12px; 
             overflow: hidden; 
@@ -64,23 +63,22 @@
             text-decoration: none; 
             color: #333; 
             scroll-snap-align: start; 
-            height: 230px !important; /* FORÇA A ALTURA PARA NÃO SOBRAR ESPAÇO */
-            display: block;
-            position: relative;
-            z-index: 10;
+            height: 230px; 
+            display: block; 
+            position: relative; /* Garante que o link funcione */
+            cursor: pointer;
         }
 
         .noticia-thumb { 
             width: 100%; 
-            height: 145px; /* Altura fixa da imagem */
+            height: 140px; 
             object-fit: cover; 
-            background: #ddd; 
             display: block; 
-            pointer-events: none; /* Deixa o toque passar para o arraste */
+            pointer-events: none; /* Deixa o clique passar para o link do card */
         }
 
         .noticia-corpo { padding: 10px; }
-        .noticia-tipo { font-size: 9px; font-weight: bold; color: var(--primary-color); text-transform: uppercase; display: block; }
+        .noticia-tipo { font-size: 9px; font-weight: bold; color: var(--primary-color); text-transform: uppercase; }
         .noticia-titulo { 
             font-size: 14px; 
             margin: 3px 0 0 0; 
@@ -99,7 +97,6 @@
 
     <header>
         <h1 style="margin:0; font-size: 1.2em;">Notícias 24 horas</h1>
-        <p style="margin:1px 0 0 0; opacity: 0.9; font-size: 0.75em;">Nova Cotia ao vivo para você</p>
     </header>
 
     <h2 class="feed-title">Destaques do Dia</h2>
@@ -142,12 +139,11 @@
 
                 noticiasFiltradas.forEach(item => {
                     const linkOriginal = (item.link || "").trim();
-                    const linkLower = linkOriginal.toLowerCase();
                     const idYoutube = getYouTubeID(linkOriginal);
-                    const tipoPlanilha = (item.tipo || "").toUpperCase();
+                    const linkLower = linkOriginal.toLowerCase();
                     
                     let imagem = "";
-                    let selo = tipoPlanilha === 'VIDEO' ? '▶ VÍDEO' : '📰 NOTÍCIA';
+                    let selo = (item.tipo || "").toUpperCase() === 'VIDEO' ? '▶ VÍDEO' : '📰 NOTÍCIA';
 
                     if (item.imagem_personalizada && item.imagem_personalizada.trim() !== "") {
                         imagem = item.imagem_personalizada;
@@ -155,12 +151,7 @@
                     else if (idYoutube && !linkLower.includes("facebook") && !linkLower.includes("instagram")) {
                         imagem = "https://img.youtube.com/vi/" + idYoutube + "/hqdefault.jpg";
                     }
-                    else if (
-                        linkLower.includes("facebook") || 
-                        linkLower.includes("fb.watch") || 
-                        linkLower.includes("instagram") || 
-                        linkLower.includes("tiktok")
-                    ) {
+                    else if (linkLower.includes("facebook") || linkLower.includes("fb.watch") || linkLower.includes("instagram") || linkLower.includes("tiktok")) {
                         imagem = imgMural;
                     }
                     else {
@@ -169,7 +160,7 @@
 
                     container.innerHTML += `
                         <a href="${linkOriginal}" target="_blank" class="noticia-card">
-                            <img src="${imagem}" class="noticia-thumb" onerror="this.src='${imgMural}'">
+                            <img src="${imagem}" class="noticia-thumb">
                             <div class="noticia-corpo">
                                 <span class="noticia-tipo">${selo}</span>
                                 <h3 class="noticia-titulo">${item.titulo || 'Nova Notícia'}</h3>
@@ -178,7 +169,7 @@
                         </a>`;
                 });
             } catch (e) {
-                document.getElementById('noticias-lista').innerHTML = "<p style='padding-left:20px; color:#777;'>Erro ao carregar as notícias.</p>";
+                document.getElementById('noticias-lista').innerHTML = "<p style='padding-left:20px; color:#777;'>Erro ao carregar.</p>";
             }
         }
         window.onload = carregarFeed;
