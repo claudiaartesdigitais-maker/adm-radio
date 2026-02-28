@@ -6,18 +6,18 @@
     <style>
         body, html { 
             margin: 0; padding: 0; 
-            background: #ffffff; /* Fundo branco padronizado */
+            background: #ffffff; 
             font-family: 'Segoe UI', Roboto, sans-serif;
             overflow-x: hidden;
             overflow-y: hidden;
-            height: 260px; 
+            height: 270px; /* Aumentado levemente para não cortar a sombra */
         }
         
         .feed-container { 
             display: flex; 
             flex-direction: row;
             overflow-x: auto; 
-            padding: 15px 10px; 
+            padding: 15px 12px; 
             gap: 15px; 
             -webkit-overflow-scrolling: touch; 
         }
@@ -27,39 +27,42 @@
         .card { 
             flex: 0 0 220px; 
             background: white; 
-            border-radius: 15px; /* Bordas arredondadas iguais aos outros */
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08); 
+            border-radius: 15px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
             text-decoration: none; 
             color: #333;
-            height: 210px;
-            display: block;
+            height: 220px; /* Ajuste na altura do card */
+            display: flex;
+            flex-direction: column;
             border: 1px solid #f0f0f0;
+            overflow: hidden;
         }
         
+        /* AJUSTE NA IMAGEM PARA NÃO CORTAR ERRADO */
         .thumb { 
             width: 100%; 
-            height: 125px; 
+            height: 130px; 
             object-fit: cover; 
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
+            object-position: center;
         }
 
-        .corpo { padding: 10px; }
+        .corpo { padding: 10px; flex: 1; }
         
         .tipo { 
             font-size: 9px; 
             color: #d32f2f; 
             font-weight: 900; 
             text-transform: uppercase; 
-            margin-bottom: 4px; 
+            margin-bottom: 5px; 
             display: block; 
+            letter-spacing: 0.5px;
         }
 
         .titulo { 
             font-size: 13px; 
             font-weight: bold; 
             line-height: 1.3; 
-            height: 34px; 
+            max-height: 36px; 
             overflow: hidden; 
             display: -webkit-box; 
             -webkit-line-clamp: 2; 
@@ -67,19 +70,13 @@
             color: #001a33;
         }
 
-        .loading { 
-            padding: 40px; 
-            text-align: center; 
-            font-weight: bold; 
-            color: #001a33; 
-            width: 100%;
-        }
+        .loading { padding: 50px; text-align: center; font-weight: bold; color: #001a33; width: 100%; }
     </style>
 </head>
 <body>
 
     <div id="lista" class="feed-container">
-        <div class="loading">A atualizar notícias...</div>
+        <div class="loading">Sincronizando notícias...</div>
     </div>
 
     <script>
@@ -92,7 +89,7 @@
                 const container = document.getElementById('lista');
                 const agora = new Date().getTime();
 
-                // Filtro: Mostra apenas o que foi postado nas últimas 24 horas
+                // Filtro 24h
                 const filtradas = dados.filter(item => {
                     const dataNoticia = new Date(item.data).getTime();
                     return (agora - dataNoticia) < 86400000;
@@ -103,7 +100,6 @@
                     return;
                 }
 
-                // Mostra as mais recentes primeiro
                 container.innerHTML = filtradas.reverse().map(item => {
                     const ytId = item.link.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/)?.[1];
                     
