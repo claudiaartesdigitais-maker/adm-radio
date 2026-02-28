@@ -8,9 +8,8 @@
             margin: 0; padding: 0; 
             background: #ffffff; 
             font-family: 'Segoe UI', Roboto, sans-serif;
-            overflow-x: hidden;
-            overflow-y: hidden;
-            height: 270px; /* Aumentado levemente para não cortar a sombra */
+            overflow: hidden;
+            height: 290px; 
         }
         
         .feed-container { 
@@ -31,31 +30,46 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
             text-decoration: none; 
             color: #333;
-            height: 220px; /* Ajuste na altura do card */
+            height: 240px; 
             display: flex;
             flex-direction: column;
             border: 1px solid #f0f0f0;
             overflow: hidden;
         }
         
-        /* AJUSTE NA IMAGEM PARA NÃO CORTAR ERRADO */
-        .thumb { 
-            width: 100%; 
-            height: 130px; 
-            object-fit: cover; 
-            object-position: center;
+        .thumb-container {
+            width: 100%;
+            height: 145px;
+            background: #fdfdfd; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-bottom: 1px solid #f3f3f3;
         }
 
-        .corpo { padding: 10px; flex: 1; }
+        .thumb { 
+            max-width: 100%; 
+            max-height: 100%; 
+            object-fit: contain; /* Mantém a imagem inteira sem cortes laterais */
+            display: block;
+        }
+
+        .corpo { 
+            padding: 12px 10px; 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-start; 
+        }
         
         .tipo { 
             font-size: 9px; 
             color: #d32f2f; 
             font-weight: 900; 
             text-transform: uppercase; 
-            margin-bottom: 5px; 
+            margin-bottom: 4px; 
             display: block; 
-            letter-spacing: 0.5px;
         }
 
         .titulo { 
@@ -70,45 +84,60 @@
             color: #001a33;
         }
 
-        .loading { padding: 50px; text-align: center; font-weight: bold; color: #001a33; width: 100%; }
+        .loading { padding: 60px; text-align: center; font-weight: bold; color: #001a33; width: 100%; }
     </style>
 </head>
 <body>
 
     <div id="lista" class="feed-container">
-        <div class="loading">Sincronizando notícias...</div>
+        <div class="loading">Sincronizando feed...</div>
     </div>
 
     <script>
         async function carregar() {
             const url = "https://script.google.com/macros/s/AKfycbxaiOSoeAhlBHnmVqLIeH61uoJdHCJJK2wFKmw16Bh0YZRG-NgqpWFaA3Ytlyprs4Q9/exec";
-            
+            const imgPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
+
             try {
                 const res = await fetch(url);
                 const dados = await res.json(); 
                 const container = document.getElementById('lista');
                 const agora = new Date().getTime();
 
-                // Filtro 24h
                 const filtradas = dados.filter(item => {
+                    if(!item.data) return false;
                     const dataNoticia = new Date(item.data).getTime();
                     return (agora - dataNoticia) < 86400000;
                 });
                 
                 if (filtradas.length === 0) {
-                    container.innerHTML = "<p style='padding:30px; font-weight:bold; color:#666; font-size:14px;'>Sem novas notícias nas últimas 24h.</p>";
+                    container.innerHTML = "<p style='padding:40px; font-weight:bold; color:#888; font-size:14px; text-align:center; width:100%;'>Nenhuma novidade nas últimas 24h.</p>";
                     return;
                 }
 
                 container.innerHTML = filtradas.reverse().map(item => {
-                    const ytId = item.link.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/)?.[1];
+                    // 1. TENTA CAPTURAR O ID DO YOUTUBE
+                    const ytMatch = item.link.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
+                    const ytId = ytMatch ? ytMatch[1] : null;
                     
-                    let img = item.imagem_personalizada || 
-                              (ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png");
+                    // 2. LOGICA DE PRIORIDADE:
+                    // Se tiver ID de YouTube -> Puxa a miniatura do YouTube obrigatoriamente
+                    // Senão, se tiver imagem personalizada -> Puxa a personalizada
+                    // Senão -> Usa o mural.png
+                    let imgFinal;
+                    if (ytId) {
+                        imgFinal = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+                    } else if (item.imagem_personalizada && item.imagem_personalizada.trim() !== "") {
+                        imgFinal = item.imagem_personalizada;
+                    } else {
+                        imgFinal = imgPadrao;
+                    }
                     
                     return `
                         <a href="${item.link}" target="_blank" class="card">
-                            <img src="${img}" class="thumb">
+                            <div class="thumb-container">
+                                <img src="${imgFinal}" class="thumb" onerror="this.src='${imgPadrao}'">
+                            </div>
                             <div class="corpo">
                                 <span class="tipo">🔥 ${(item.tipo || 'Notícia')}</span>
                                 <div class="titulo">${item.titulo}</div>
