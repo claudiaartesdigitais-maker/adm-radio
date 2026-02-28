@@ -51,7 +51,7 @@
         .thumb { 
             max-width: 100%; 
             max-height: 100%; 
-            object-fit: contain; /* Mantém a imagem inteira sem cortes laterais */
+            object-fit: contain; 
             display: block;
         }
 
@@ -96,6 +96,7 @@
     <script>
         async function carregar() {
             const url = "https://script.google.com/macros/s/AKfycbxaiOSoeAhlBHnmVqLIeH61uoJdHCJJK2wFKmw16Bh0YZRG-NgqpWFaA3Ytlyprs4Q9/exec";
+            // SUA IMAGEM PADRÃO
             const imgPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
 
             try {
@@ -116,25 +117,37 @@
                 }
 
                 container.innerHTML = filtradas.reverse().map(item => {
-                    // 1. TENTA CAPTURAR O ID DO YOUTUBE
-                    const ytMatch = item.link.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
+                    const linkOriginal = item.link || "";
+                    const linkLower = linkOriginal.toLowerCase();
+                    
+                    // 1. Detecta YouTube
+                    const ytMatch = linkOriginal.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
                     const ytId = ytMatch ? ytMatch[1] : null;
                     
-                    // 2. LOGICA DE PRIORIDADE:
-                    // Se tiver ID de YouTube -> Puxa a miniatura do YouTube obrigatoriamente
-                    // Senão, se tiver imagem personalizada -> Puxa a personalizada
-                    // Senão -> Usa o mural.png
                     let imgFinal;
+
+                    // REGRA 1: Se for YouTube, puxa miniatura do Google
                     if (ytId) {
                         imgFinal = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-                    } else if (item.imagem_personalizada && item.imagem_personalizada.trim() !== "") {
+                    } 
+                    // REGRA 2: Se for rede social bloqueada, força o mural.png
+                    else if (linkLower.includes("facebook.com") || 
+                             linkLower.includes("instagram.com") || 
+                             linkLower.includes("tiktok.com") || 
+                             linkLower.includes("kwai.com")) {
+                        imgFinal = imgPadrao;
+                    }
+                    // REGRA 3: Se houver imagem personalizada (ex: link de foto direta), usa ela
+                    else if (item.imagem_personalizada && item.imagem_personalizada.trim() !== "") {
                         imgFinal = item.imagem_personalizada;
-                    } else {
+                    } 
+                    // PADRÃO FINAL
+                    else {
                         imgFinal = imgPadrao;
                     }
                     
                     return `
-                        <a href="${item.link}" target="_blank" class="card">
+                        <a href="${linkOriginal}" target="_blank" class="card">
                             <div class="thumb-container">
                                 <img src="${imgFinal}" class="thumb" onerror="this.src='${imgPadrao}'">
                             </div>
