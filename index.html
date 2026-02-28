@@ -45,7 +45,6 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            border-bottom: 1px solid #f3f3f3;
         }
 
         .thumb { 
@@ -55,13 +54,7 @@
             display: block;
         }
 
-        .corpo { 
-            padding: 12px 10px; 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: flex-start; 
-        }
+        .corpo { padding: 12px 10px; flex: 1; }
         
         .tipo { 
             font-size: 9px; 
@@ -83,20 +76,15 @@
             -webkit-box-orient: vertical; 
             color: #001a33;
         }
-
-        .loading { padding: 60px; text-align: center; font-weight: bold; color: #001a33; width: 100%; }
     </style>
 </head>
 <body>
 
-    <div id="lista" class="feed-container">
-        <div class="loading">Sincronizando feed...</div>
-    </div>
+    <div id="lista" class="feed-container"></div>
 
     <script>
         async function carregar() {
             const url = "https://script.google.com/macros/s/AKfycbxaiOSoeAhlBHnmVqLIeH61uoJdHCJJK2wFKmw16Bh0YZRG-NgqpWFaA3Ytlyprs4Q9/exec";
-            // SUA IMAGEM PADRÃO
             const imgPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
 
             try {
@@ -107,12 +95,11 @@
 
                 const filtradas = dados.filter(item => {
                     if(!item.data) return false;
-                    const dataNoticia = new Date(item.data).getTime();
-                    return (agora - dataNoticia) < 86400000;
+                    return (agora - new Date(item.data).getTime()) < 86400000;
                 });
                 
                 if (filtradas.length === 0) {
-                    container.innerHTML = "<p style='padding:40px; font-weight:bold; color:#888; font-size:14px; text-align:center; width:100%;'>Nenhuma novidade nas últimas 24h.</p>";
+                    container.innerHTML = "<p style='padding:40px; font-weight:bold; color:#888; text-align:center; width:100%;'>Sem notícias nas últimas 24h.</p>";
                     return;
                 }
 
@@ -120,28 +107,31 @@
                     const linkOriginal = item.link || "";
                     const linkLower = linkOriginal.toLowerCase();
                     
-                    // 1. Detecta YouTube
+                    // Identifica YouTube
                     const ytMatch = linkOriginal.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
                     const ytId = ytMatch ? ytMatch[1] : null;
                     
                     let imgFinal;
 
-                    // REGRA 1: Se for YouTube, puxa miniatura do Google
+                    // 1. SE FOR YOUTUBE: Traz a miniatura sempre (mesmo se for da sua página)
                     if (ytId) {
                         imgFinal = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
                     } 
-                    // REGRA 2: Se for rede social bloqueada, força o mural.png
-                    else if (linkLower.includes("facebook.com") || 
-                             linkLower.includes("instagram.com") || 
-                             linkLower.includes("tiktok.com") || 
-                             linkLower.includes("kwai.com")) {
+                    // 2. SE NÃO FOR YOUTUBE E FOR REDE SOCIAL: Usa mural.png
+                    else if (
+                        linkLower.includes("facebook") || 
+                        linkLower.includes("instagram") || 
+                        linkLower.includes("tiktok") || 
+                        linkLower.includes("kwai") || 
+                        (linkLower.includes("webnovacotia") && !linkLower.includes("youtube"))
+                    ) {
                         imgFinal = imgPadrao;
                     }
-                    // REGRA 3: Se houver imagem personalizada (ex: link de foto direta), usa ela
-                    else if (item.imagem_personalizada && item.imagem_personalizada.trim() !== "") {
+                    // 3. Se tiver imagem personalizada: usa ela
+                    else if (item.imagem_personalizada && item.imagem_personalizada.trim().length > 10) {
                         imgFinal = item.imagem_personalizada;
                     } 
-                    // PADRÃO FINAL
+                    // 4. Caso contrário: mural.png
                     else {
                         imgFinal = imgPadrao;
                     }
@@ -157,9 +147,7 @@
                             </div>
                         </a>`;
                 }).join('');
-            } catch (e) { 
-                document.getElementById('lista').innerHTML = "<div class='loading'>Erro ao carregar notícias.</div>"; 
-            }
+            } catch (e) { console.error(e); }
         }
         carregar();
     </script>
