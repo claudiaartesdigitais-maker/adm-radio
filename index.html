@@ -76,16 +76,21 @@
             -webkit-box-orient: vertical; 
             color: #001a33;
         }
+
+        .loading { padding: 60px; text-align: center; font-weight: bold; color: #888; width: 100%; font-size: 13px; }
     </style>
 </head>
 <body>
 
-    <div id="lista" class="feed-container"></div>
+    <div id="lista" class="feed-container">
+        <div class="loading">Carregando Notícias 24h...</div>
+    </div>
 
     <script>
         async function carregar() {
             const url = "https://script.google.com/macros/s/AKfycbxaiOSoeAhlBHnmVqLIeH61uoJdHCJJK2wFKmw16Bh0YZRG-NgqpWFaA3Ytlyprs4Q9/exec";
-            const imgPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
+            // Imagem padrão (Mural) - Adicionado um timestamp para evitar cache antigo
+            const imgPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png?v=" + new Date().getTime();
 
             try {
                 const res = await fetch(url);
@@ -93,13 +98,15 @@
                 const container = document.getElementById('lista');
                 const agora = new Date().getTime();
 
+                // Filtro das últimas 24 horas
                 const filtradas = dados.filter(item => {
                     if(!item.data) return false;
-                    return (agora - new Date(item.data).getTime()) < 86400000;
+                    const dataNoticia = new Date(item.data).getTime();
+                    return (agora - dataNoticia) < 86400000;
                 });
                 
                 if (filtradas.length === 0) {
-                    container.innerHTML = "<p style='padding:40px; font-weight:bold; color:#888; text-align:center; width:100%;'>Sem notícias nas últimas 24h.</p>";
+                    container.innerHTML = "<p style='padding:40px; font-weight:bold; color:#888; text-align:center; width:100%;'>Nenhuma notícia nas últimas 24h.</p>";
                     return;
                 }
 
@@ -107,35 +114,32 @@
                     const linkOriginal = item.link || "";
                     const linkLower = linkOriginal.toLowerCase();
                     
-                    // Identifica YouTube
+                    // Identifica se é YouTube
                     const ytMatch = linkOriginal.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
                     const ytId = ytMatch ? ytMatch[1] : null;
                     
-                    let imgFinal;
+                    // Começamos assumindo que a imagem é o MURAL
+                    let imgFinal = imgPadrao;
 
-                    // 1. SE FOR YOUTUBE: Traz a miniatura sempre (mesmo se for da sua página)
+                    // REGRA 1: Se for YouTube, usamos a miniatura do Google
                     if (ytId) {
                         imgFinal = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
                     } 
-                    // 2. SE NÃO FOR YOUTUBE E FOR REDE SOCIAL: Usa mural.png
+                    // REGRA 2: Se NÃO for YouTube, verificamos se é rede social bloqueada
                     else if (
                         linkLower.includes("facebook") || 
                         linkLower.includes("instagram") || 
                         linkLower.includes("tiktok") || 
                         linkLower.includes("kwai") || 
-                        (linkLower.includes("webnovacotia") && !linkLower.includes("youtube"))
+                        linkLower.includes("webnovacotia")
                     ) {
-                        imgFinal = imgPadrao;
+                        imgFinal = imgPadrao; // Força o mural para essas redes
                     }
-                    // 3. Se tiver imagem personalizada: usa ela
+                    // REGRA 3: Se houver imagem personalizada (links de sites de notícias, etc)
                     else if (item.imagem_personalizada && item.imagem_personalizada.trim().length > 10) {
                         imgFinal = item.imagem_personalizada;
-                    } 
-                    // 4. Caso contrário: mural.png
-                    else {
-                        imgFinal = imgPadrao;
                     }
-                    
+
                     return `
                         <a href="${linkOriginal}" target="_blank" class="card">
                             <div class="thumb-container">
@@ -147,7 +151,9 @@
                             </div>
                         </a>`;
                 }).join('');
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                document.getElementById('lista').innerHTML = "<div class='loading'>Erro ao conectar com a planilha.</div>"; 
+            }
         }
         carregar();
     </script>
