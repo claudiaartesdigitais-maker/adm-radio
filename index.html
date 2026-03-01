@@ -4,85 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        /* Ajuste de altura do corpo para comportar cards maiores */
-        body, html { 
-            margin: 0; padding: 0; 
-            background: #ffffff; 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            overflow: hidden; 
-            height: 480px; 
-        }
-        
-        .mural-titulo { 
-            padding: 15px 18px 8px 18px; 
-            font-size: 22px; /* Título maior */
-            font-weight: 900; 
-            color: #001a33; 
-            text-transform: uppercase; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-        }
+        body, html { margin: 0; padding: 0; background: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; overflow: hidden; height: 480px; }
+        .mural-titulo { padding: 15px 18px 8px 18px; font-size: 22px; font-weight: 900; color: #001a33; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
         .mural-titulo::before { content: ''; width: 5px; height: 22px; background: #d32f2f; border-radius: 2px; }
-
-        .feed-container { 
-            display: flex; 
-            flex-direction: row; 
-            overflow-x: auto; 
-            padding: 10px 15px 35px 15px; 
-            gap: 18px; 
-            -webkit-overflow-scrolling: touch; 
-        }
+        .feed-container { display: flex; flex-direction: row; overflow-x: auto; padding: 10px 15px 35px 15px; gap: 18px; -webkit-overflow-scrolling: touch; }
         .feed-container::-webkit-scrollbar { display: none; }
-
-        .card { 
-            flex: 0 0 300px; /* Card bem mais largo */
-            background: white; 
-            border-radius: 20px; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12); 
-            text-decoration: none; 
-            color: #333; 
-            height: 400px; /* Card mais alto */
-            display: flex; 
-            flex-direction: column; 
-            border: 1px solid #eee; 
-            overflow: hidden; 
-        }
-
-        .thumb-container { 
-            width: 100%; 
-            height: 200px; /* Imagem grande e clara */
-            background: #000; 
-            overflow: hidden; 
-        }
-
-        .thumb { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            display: block; 
-        }
-
+        .card { flex: 0 0 300px; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.12); text-decoration: none; color: #333; height: 400px; display: flex; flex-direction: column; border: 1px solid #eee; overflow: hidden; }
+        .thumb-container { width: 100%; height: 200px; background: #000; overflow: hidden; }
+        .thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
         .corpo { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: flex-start; }
-        
-        .tipo { 
-            font-size: 12px; 
-            color: #d32f2f; 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            margin-bottom: 8px; 
-        }
-
-        .titulo { 
-            font-size: 18px; /* Título da notícia maior */
-            font-weight: bold; 
-            line-height: 1.4; 
-            color: #001a33;
-            display: -webkit-box;
-            -webkit-line-clamp: 4; /* Até 4 linhas para não cortar texto importante */
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
+        .tipo { font-size: 12px; color: #d32f2f; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; }
+        .titulo { font-size: 18px; font-weight: bold; line-height: 1.4; color: #001a33; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
     </style>
 </head>
 <body>
@@ -92,7 +24,8 @@
     <script>
         async function carregar() {
             const url = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec";
-            const imgMuralPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
+            // Forçamos o link direto da imagem para evitar falhas de cache
+            const imgMuralPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png?t=" + new Date().getTime();
 
             try {
                 const res = await fetch(url);
@@ -116,10 +49,16 @@
                     const ytId = ytMatch ? ytMatch[1] : null;
                     
                     let imgFinal;
+                    
+                    // LÓGICA DE IMAGEM REVISADA:
                     if (ytId) {
                         imgFinal = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+                    } else if (item.capa && item.capa.trim().length > 15 && item.capa.startsWith('http')) {
+                        // Só usa a capa da planilha se for um link de imagem válido
+                        imgFinal = item.capa;
                     } else {
-                        imgFinal = (item.capa && item.capa.trim().length > 10) ? item.capa : imgMuralPadrao;
+                        // Para Facebook ou qualquer outro link sem foto na planilha, USA O MURAL
+                        imgFinal = imgMuralPadrao;
                     }
                     
                     return `
