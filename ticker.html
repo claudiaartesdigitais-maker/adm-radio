@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { margin: 0; padding: 0; background: transparent; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+        body { margin: 0; padding: 0; background: transparent; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; }
         
         .ticker-wrap {
             width: 100%;
             overflow: hidden;
-            background-color: #003366; /* Azul Escuro */
+            background-color: #002366; /* Azul Royal Profundo */
             height: 40px;
             display: flex;
             align-items: center;
-            border-radius: 5px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+            border-radius: 4px;
         }
 
         .ticker-label {
-            background: #0055aa; /* Azul mais claro para o selo */
+            background: #0041C2; /* Azul Royal Vibrante */
             color: white;
             padding: 0 15px;
             height: 100%;
@@ -28,66 +27,70 @@
             z-index: 2;
             white-space: nowrap;
             letter-spacing: 1px;
-            border-right: 2px solid #002244;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.3);
         }
 
         .ticker-move {
             display: flex;
             white-space: nowrap;
-            padding-left: 100%; /* Começa fora da tela */
+            will-change: transform;
             animation: ticker linear infinite;
         }
 
         .ticker-item {
-            padding: 0 30px;
+            padding: 0 35px;
             font-size: 14px;
             color: #ffffff;
             text-decoration: none;
             display: flex;
             align-items: center;
+            font-weight: 500;
         }
 
-        .ticker-item:hover { color: #81BEF7; }
-
         @keyframes ticker {
-            0% { transform: translateX(0); }
+            0% { transform: translateX(100vw); }
             100% { transform: translateX(-100%); }
         }
     </style>
 </head>
 <body>
     <div class="ticker-wrap">
-        <div class="ticker-label">ÚLTIMAS NOTÍCIAS</div>
-        <div class="ticker-move" id="ticker-content">
-            <span class="ticker-item">Conectando ao servidor de notícias...</span>
+        <div class="ticker-label">GIRO DE NOTÍCIAS</div>
+        <div id="ticker-target" class="ticker-move">
+            <span class="ticker-item">Carregando informações...</span>
         </div>
     </div>
 
     <script>
-        async function carregarNoticias() {
-            // Fonte: Agência Brasil (EBC) - Gratuito e oficial
+        async function carregarGiro() {
+            // Fonte gratuita: Agência Brasil
             const rss_url = 'https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml';
             const api_url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss_url)}`;
             
             try {
                 const response = await fetch(api_url);
                 const data = await response.json();
-                const container = document.getElementById('ticker-content');
+                const container = document.getElementById('ticker-target');
                 
                 if(data.items && data.items.length > 0) {
-                    // Monta a lista de notícias
-                    const html = data.items.map(item => `<a class="ticker-item" href="${item.link}" target="_blank"> • ${item.title.toUpperCase()}</a>`).join('');
-                    container.innerHTML = html + html; // Duplica para não ter buraco na animação
+                    // Monta o texto: TÍTULO DA NOTÍCIA
+                    const html = data.items.map(item => `
+                        <a class="ticker-item" href="${item.link}" target="_blank"> 
+                            <span style="color: #FFD700; margin-right: 10px;">•</span> ${item.title.toUpperCase()}
+                        </a>
+                    `).join('');
                     
-                    // Ajusta a velocidade (mais notícias = mais tempo para percorrer)
-                    const tempo = data.items.length * 15; 
+                    container.innerHTML = html;
+                    
+                    // Ajusta velocidade: quanto mais texto, mais lento para dar tempo de ler
+                    const tempo = (container.scrollWidth / 50); 
                     container.style.animationDuration = tempo + 's';
                 }
             } catch (e) {
-                document.getElementById('ticker-content').innerHTML = '<span class="ticker-item">Aguardando atualização de notícias...</span>';
+                console.error("Erro ao buscar RSS");
             }
         }
-        carregarNoticias();
+        carregarGiro();
     </script>
 </body>
 </html>
