@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { margin: 0; padding: 0; background: transparent; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+        
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            background-color: #003366; /* Azul Escuro */
+            height: 40px;
+            display: flex;
+            align-items: center;
+            border-radius: 5px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .ticker-label {
+            background: #0055aa; /* Azul mais claro para o selo */
+            color: white;
+            padding: 0 15px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 900;
+            z-index: 2;
+            white-space: nowrap;
+            letter-spacing: 1px;
+            border-right: 2px solid #002244;
+        }
+
+        .ticker-move {
+            display: flex;
+            white-space: nowrap;
+            padding-left: 100%; /* Começa fora da tela */
+            animation: ticker linear infinite;
+        }
+
+        .ticker-item {
+            padding: 0 30px;
+            font-size: 14px;
+            color: #ffffff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .ticker-item:hover { color: #81BEF7; }
+
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="ticker-wrap">
+        <div class="ticker-label">ÚLTIMAS NOTÍCIAS</div>
+        <div class="ticker-move" id="ticker-content">
+            <span class="ticker-item">Conectando ao servidor de notícias...</span>
+        </div>
+    </div>
+
+    <script>
+        async function carregarNoticias() {
+            // Fonte: Agência Brasil (EBC) - Gratuito e oficial
+            const rss_url = 'https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml';
+            const api_url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss_url)}`;
+            
+            try {
+                const response = await fetch(api_url);
+                const data = await response.json();
+                const container = document.getElementById('ticker-content');
+                
+                if(data.items && data.items.length > 0) {
+                    // Monta a lista de notícias
+                    const html = data.items.map(item => `<a class="ticker-item" href="${item.link}" target="_blank"> • ${item.title.toUpperCase()}</a>`).join('');
+                    container.innerHTML = html + html; // Duplica para não ter buraco na animação
+                    
+                    // Ajusta a velocidade (mais notícias = mais tempo para percorrer)
+                    const tempo = data.items.length * 15; 
+                    container.style.animationDuration = tempo + 's';
+                }
+            } catch (e) {
+                document.getElementById('ticker-content').innerHTML = '<span class="ticker-item">Aguardando atualização de notícias...</span>';
+            }
+        }
+        carregarNoticias();
+    </script>
+</body>
+</html>
