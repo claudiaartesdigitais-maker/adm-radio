@@ -4,71 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        body, html { 
-            margin: 0; padding: 0; 
-            background: #ffffff; 
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            overflow: hidden;
-            height: 420px; 
-        }
-
-        .mural-titulo {
-            padding: 15px 18px 5px 18px;
-            font-size: 20px;
-            font-weight: 900;
-            color: #001a33;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center; gap: 8px;
-        }
-
-        .mural-titulo::before {
-            content: ''; width: 4px; height: 20px;
-            background: #d32f2f; border-radius: 2px;
-        }
-        
-        .feed-container { 
-            display: flex; flex-direction: row;
-            overflow-x: auto; padding: 10px 15px 25px 15px; 
-            gap: 20px; -webkit-overflow-scrolling: touch; 
-        }
-        
+        body, html { margin: 0; padding: 0; background: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; overflow: hidden; height: 420px; }
+        .mural-titulo { padding: 15px 18px 5px 18px; font-size: 20px; font-weight: 900; color: #001a33; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+        .mural-titulo::before { content: ''; width: 4px; height: 20px; background: #d32f2f; border-radius: 2px; }
+        .feed-container { display: flex; flex-direction: row; overflow-x: auto; padding: 10px 15px 25px 15px; gap: 20px; -webkit-overflow-scrolling: touch; }
         .feed-container::-webkit-scrollbar { display: none; }
-
-        .card { 
-            flex: 0 0 300px; background: white; 
-            border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); 
-            text-decoration: none; color: #333;
-            height: 350px; display: flex;
-            flex-direction: column; border: 1px solid #f0f0f0;
-            overflow: hidden;
-        }
-        
-        .thumb-container {
-            width: 100%; height: 220px;
-            background: #000; display: flex;
-            align-items: center; justify-content: center;
-            overflow: hidden;
-        }
-
+        .card { flex: 0 0 300px; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); text-decoration: none; color: #333; height: 350px; display: flex; flex-direction: column; border: 1px solid #f0f0f0; overflow: hidden; }
+        .thumb-container { width: 100%; height: 220px; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .thumb { width: 100%; height: 100%; display: block; }
         .img-capa { object-fit: cover; } 
         .img-mural { object-fit: contain; background: #f4f4f4; } 
-
         .corpo { padding: 15px; flex: 1; background: #fff; }
         .tipo { font-size: 11px; color: #d32f2f; font-weight: 900; text-transform: uppercase; margin-bottom: 6px; display: block; }
         .titulo { font-size: 16px; font-weight: bold; line-height: 1.4; max-height: 45px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: #001a33; }
     </style>
 </head>
 <body>
-
     <div class="mural-titulo">Notícias 24 horas</div>
     <div id="lista" class="feed-container"></div>
 
     <script>
         async function carregar() {
-            const url = "https://script.google.com/macros/s/AKfycbxaiOSoeAhlBHnmVqLIeH61uoJdHCJJK2wFKmw16Bh0YZRG-NgqpWFaA3Ytlyprs4Q9/exec";
+            // Seu novo link da API já inserido aqui:
+            const url = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec";
             const imgMuralPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
 
             try {
@@ -83,37 +41,24 @@
                 });
                 
                 if (filtradas.length === 0) {
-                    container.innerHTML = "<p style='padding:50px; color:#999; text-align:center; width:100%;'>Sem notícias nas últimas 24h.</p>";
+                    container.innerHTML = "<p style='padding:50px; color:#999; text-align:center; width:100%;'>Nenhuma notícia nas últimas 24h.</p>";
                     return;
                 }
 
                 container.innerHTML = filtradas.reverse().map(item => {
-                    const linkOriginal = (item.link || "");
-                    const linkLower = linkOriginal.toLowerCase();
+                    const linkOriginal = item.link || "";
                     const ytMatch = linkOriginal.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
                     const ytId = ytMatch ? ytMatch[1] : null;
                     
                     let imgFinal;
                     let classeImg = "img-capa"; 
 
-                    // 1. REGRA YOUTUBE (PRIORIDADE)
                     if (ytId) {
                         imgFinal = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
-                    } 
-                    // 2. REGRA REDES SOCIAIS (IDENTIFICAÇÃO AGRESSIVA)
-                    else if (linkLower.includes("facebook") || linkLower.includes("fb.watch") || linkLower.includes("instagram") || linkLower.includes("tiktok") || linkLower.includes("kwai")) {
-                        // Força o link da coluna "capa" da planilha ou o mural padrão
+                    } else {
+                        // Usa o link da Coluna F (capa), se estiver vazio usa o mural.png
                         imgFinal = (item.capa && item.capa.trim().length > 10) ? item.capa : imgMuralPadrao;
                         classeImg = "img-mural"; 
-                    } 
-                    // 3. OUTROS LINKS COM IMAGEM PERSONALIZADA
-                    else if (item.imagem_personalizada && item.imagem_personalizada.trim().length > 10) {
-                        imgFinal = item.imagem_personalizada;
-                    } 
-                    // 4. PADRÃO PARA TODO O RESTO
-                    else {
-                        imgFinal = imgMuralPadrao;
-                        classeImg = "img-mural";
                     }
                     
                     return `
