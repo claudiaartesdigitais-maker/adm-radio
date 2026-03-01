@@ -9,49 +9,60 @@
             background: #ffffff; 
             font-family: 'Segoe UI', Roboto, sans-serif;
             overflow: hidden;
-            height: 380px; 
+            height: 420px; 
         }
 
-        /* TITULO DO MURAL */
         .mural-titulo {
-            padding: 15px 15px 5px 15px;
-            font-size: 18px;
-            font-weight: 800;
+            padding: 15px 18px 5px 18px;
+            font-size: 20px;
+            font-weight: 900;
             color: #001a33;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mural-titulo::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #d32f2f;
+            border-radius: 2px;
         }
         
         .feed-container { 
             display: flex; 
             flex-direction: row;
             overflow-x: auto; 
-            padding: 10px 12px 20px 12px; 
-            gap: 15px; 
+            padding: 10px 15px 25px 15px; 
+            gap: 20px; 
             -webkit-overflow-scrolling: touch; 
         }
         
         .feed-container::-webkit-scrollbar { display: none; }
 
         .card { 
-            flex: 0 0 260px; /* Card um pouco mais largo para a imagem maior */
+            flex: 0 0 300px; /* Card bem mais largo */
             background: white; 
-            border-radius: 15px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08); 
+            border-radius: 20px; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1); 
             text-decoration: none; 
             color: #333;
-            height: 310px; 
+            height: 350px; /* Altura total do card aumentada */
             display: flex;
             flex-direction: column;
             border: 1px solid #f0f0f0;
             overflow: hidden;
+            transition: transform 0.2s;
         }
         
-        /* AREA DA IMAGEM AMPLIADA */
+        /* AREA DA IMAGEM GIGANTE */
         .thumb-container {
             width: 100%;
-            height: 180px; /* Aumentado de 145px para 180px */
-            background: #f9f9f9; 
+            height: 220px; /* Imagem agora ocupa a maior parte do card */
+            background: #f4f4f4; 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -59,28 +70,28 @@
         }
 
         .thumb { 
-            max-width: 100%; 
-            max-height: 100%; 
-            object-fit: contain; 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; /* "Cover" para preencher o espaço como uma capa de revista */
             display: block;
         }
 
-        .corpo { padding: 12px; flex: 1; }
+        .corpo { padding: 15px; flex: 1; background: #fff; }
         
         .tipo { 
-            font-size: 10px; 
+            font-size: 11px; 
             color: #d32f2f; 
             font-weight: 900; 
             text-transform: uppercase; 
-            margin-bottom: 5px; 
+            margin-bottom: 6px; 
             display: block; 
         }
 
         .titulo { 
-            font-size: 14px; 
+            font-size: 16px; 
             font-weight: bold; 
-            line-height: 1.3; 
-            max-height: 38px; 
+            line-height: 1.4; 
+            max-height: 45px; 
             overflow: hidden; 
             display: -webkit-box; 
             -webkit-line-clamp: 2; 
@@ -88,7 +99,7 @@
             color: #001a33;
         }
 
-        .loading { padding: 80px; text-align: center; color: #888; width: 100%; }
+        .loading { padding: 100px; text-align: center; color: #888; width: 100%; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -96,7 +107,7 @@
     <div class="mural-titulo">Notícias 24 horas</div>
 
     <div id="lista" class="feed-container">
-        <div class="loading">Carregando...</div>
+        <div class="loading">Buscando novidades...</div>
     </div>
 
     <script>
@@ -116,7 +127,7 @@
                 });
                 
                 if (filtradas.length === 0) {
-                    container.innerHTML = "<p style='padding:40px; color:#888; text-align:center; width:100%;'>Nenhuma novidade nas últimas 24h.</p>";
+                    container.innerHTML = "<p style='padding:50px; color:#999; text-align:center; width:100%; font-size:14px;'>Nenhuma notícia publicada nas últimas 24h.</p>";
                     return;
                 }
 
@@ -155,14 +166,3 @@
     </script>
 </body>
 </html>
-2. Código do Iframe (Para o seu Agregador/Site)
-Como as imagens e os cards cresceram, a altura do Iframe precisa ser maior para não aparecer barra de rolagem lateral no bloco inteiro. Use 380px de altura:
-
-HTML
-<div style="width: 100%; margin-top: 10px; margin-bottom: 10px; background: #ffffff; border-radius: 15px; overflow: hidden;">
-    <iframe 
-        src="https://claudiaartesdigitais-maker.github.io/adm-radio/" 
-        style="width: 100%; height: 380px; border: none; display: block;"
-        scrolling="no">
-    </iframe>
-</div>
