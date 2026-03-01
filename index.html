@@ -9,14 +9,24 @@
             background: #ffffff; 
             font-family: 'Segoe UI', Roboto, sans-serif;
             overflow: hidden;
-            height: 295px; 
+            height: 380px; 
+        }
+
+        /* TITULO DO MURAL */
+        .mural-titulo {
+            padding: 15px 15px 5px 15px;
+            font-size: 18px;
+            font-weight: 800;
+            color: #001a33;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .feed-container { 
             display: flex; 
             flex-direction: row;
             overflow-x: auto; 
-            padding: 15px 12px; 
+            padding: 10px 12px 20px 12px; 
             gap: 15px; 
             -webkit-overflow-scrolling: touch; 
         }
@@ -24,23 +34,24 @@
         .feed-container::-webkit-scrollbar { display: none; }
 
         .card { 
-            flex: 0 0 220px; 
+            flex: 0 0 260px; /* Card um pouco mais largo para a imagem maior */
             background: white; 
             border-radius: 15px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08); 
             text-decoration: none; 
             color: #333;
-            height: 245px; 
+            height: 310px; 
             display: flex;
             flex-direction: column;
             border: 1px solid #f0f0f0;
             overflow: hidden;
         }
         
+        /* AREA DA IMAGEM AMPLIADA */
         .thumb-container {
             width: 100%;
-            height: 145px;
-            background: #fdfdfd; 
+            height: 180px; /* Aumentado de 145px para 180px */
+            background: #f9f9f9; 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -54,33 +65,39 @@
             display: block;
         }
 
-        .corpo { padding: 12px 10px; flex: 1; }
+        .corpo { padding: 12px; flex: 1; }
         
         .tipo { 
-            font-size: 9px; 
+            font-size: 10px; 
             color: #d32f2f; 
             font-weight: 900; 
             text-transform: uppercase; 
-            margin-bottom: 4px; 
+            margin-bottom: 5px; 
             display: block; 
         }
 
         .titulo { 
-            font-size: 13px; 
+            font-size: 14px; 
             font-weight: bold; 
             line-height: 1.3; 
-            max-height: 36px; 
+            max-height: 38px; 
             overflow: hidden; 
             display: -webkit-box; 
             -webkit-line-clamp: 2; 
             -webkit-box-orient: vertical; 
             color: #001a33;
         }
+
+        .loading { padding: 80px; text-align: center; color: #888; width: 100%; }
     </style>
 </head>
 <body>
 
-    <div id="lista" class="feed-container"></div>
+    <div class="mural-titulo">Notícias 24 horas</div>
+
+    <div id="lista" class="feed-container">
+        <div class="loading">Carregando...</div>
+    </div>
 
     <script>
         async function carregar() {
@@ -99,40 +116,25 @@
                 });
                 
                 if (filtradas.length === 0) {
-                    container.innerHTML = "<p style='padding:40px; font-weight:bold; color:#888; text-align:center; width:100%;'>Sem notícias nas últimas 24h.</p>";
+                    container.innerHTML = "<p style='padding:40px; color:#888; text-align:center; width:100%;'>Nenhuma novidade nas últimas 24h.</p>";
                     return;
                 }
 
                 container.innerHTML = filtradas.reverse().map(item => {
                     const linkOriginal = item.link || "";
                     const linkLower = linkOriginal.toLowerCase();
-                    
-                    // Identifica YouTube
                     const ytMatch = linkOriginal.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
                     const ytId = ytMatch ? ytMatch[1] : null;
                     
                     let imgFinal;
 
-                    // PRIORIDADE 1: YouTube SEMPRE traz a miniatura
                     if (ytId) {
                         imgFinal = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-                    } 
-                    // PRIORIDADE 2: Redes Sociais puxam obrigatoriamente a coluna "Capa" (F3)
-                    else if (
-                        linkLower.includes("facebook") || 
-                        linkLower.includes("instagram") || 
-                        linkLower.includes("tiktok") || 
-                        linkLower.includes("kwai")
-                    ) {
-                        // Se a coluna Capa tiver link, usa ele. Se estiver vazia, usa o mural.png
+                    } else if (linkLower.includes("facebook") || linkLower.includes("instagram") || linkLower.includes("tiktok") || linkLower.includes("kwai")) {
                         imgFinal = (item.capa && item.capa.trim().length > 10) ? item.capa : imgPadrao;
-                    }
-                    // PRIORIDADE 3: Outros casos com imagem personalizada
-                    else if (item.imagem_personalizada && item.imagem_personalizada.trim().length > 10) {
+                    } else if (item.imagem_personalizada && item.imagem_personalizada.trim().length > 10) {
                         imgFinal = item.imagem_personalizada;
-                    } 
-                    // PADRÃO
-                    else {
+                    } else {
                         imgFinal = imgPadrao;
                     }
                     
@@ -153,3 +155,14 @@
     </script>
 </body>
 </html>
+2. Código do Iframe (Para o seu Agregador/Site)
+Como as imagens e os cards cresceram, a altura do Iframe precisa ser maior para não aparecer barra de rolagem lateral no bloco inteiro. Use 380px de altura:
+
+HTML
+<div style="width: 100%; margin-top: 10px; margin-bottom: 10px; background: #ffffff; border-radius: 15px; overflow: hidden;">
+    <iframe 
+        src="https://claudiaartesdigitais-maker.github.io/adm-radio/" 
+        style="width: 100%; height: 380px; border: none; display: block;"
+        scrolling="no">
+    </iframe>
+</div>
