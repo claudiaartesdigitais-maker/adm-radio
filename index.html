@@ -4,61 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        /* Estilo base e ajuste de altura para o Iframe */
         body, html { 
             margin: 0; padding: 0; 
             background: #ffffff; 
             font-family: 'Segoe UI', Roboto, sans-serif; 
             overflow: hidden; 
-            height: 430px; 
+            height: 350px; /* Altura total reduzida */
         }
         
-        /* Título do Mural */
         .mural-titulo { 
-            padding: 15px 18px 5px 18px; 
-            font-size: 20px; 
+            padding: 12px 15px 5px 15px; 
+            font-size: 18px; 
             font-weight: 900; 
             color: #001a33; 
             text-transform: uppercase; 
             display: flex; 
             align-items: center; 
-            gap: 8px; 
+            gap: 6px; 
         }
-        .mural-titulo::before { 
-            content: ''; width: 4px; height: 20px; 
-            background: #d32f2f; border-radius: 2px; 
-        }
+        .mural-titulo::before { content: ''; width: 4px; height: 16px; background: #d32f2f; border-radius: 2px; }
 
-        /* Container de rolagem horizontal */
         .feed-container { 
             display: flex; 
             flex-direction: row; 
             overflow-x: auto; 
-            padding: 10px 15px 30px 15px; 
-            gap: 15px; 
+            padding: 10px 15px 20px 15px; 
+            gap: 12px; 
             -webkit-overflow-scrolling: touch; 
         }
         .feed-container::-webkit-scrollbar { display: none; }
 
-        /* Estilo do Card */
         .card { 
-            flex: 0 0 280px; 
+            flex: 0 0 260px; /* Largura reduzida */
             background: white; 
-            border-radius: 18px; 
-            box-shadow: 0 6px 15px rgba(0,0,0,0.1); 
+            border-radius: 15px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08); 
             text-decoration: none; 
             color: #333; 
-            height: 355px; 
+            height: 280px; /* Altura total do card menor */
             display: flex; 
             flex-direction: column; 
             border: 1px solid #eee; 
             overflow: hidden; 
         }
 
-        /* Container da Imagem - Preenchimento total sem bordas pretas */
         .thumb-container { 
             width: 100%; 
-            height: 200px; 
+            height: 150px; /* Altura da imagem reduzida para o padrão anterior */
             background: #000; 
             overflow: hidden; 
         }
@@ -66,34 +58,19 @@
         .thumb { 
             width: 100%; 
             height: 100%; 
-            object-fit: cover; /* Faz a imagem preencher todo o espaço */
+            object-fit: cover; /* Garante que YouTube e Mural ocupem o mesmo espaço */
             display: block; 
         }
 
-        /* Corpo do texto do Card */
-        .corpo { 
-            padding: 12px; 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: flex-start; 
-        }
-        
-        .tipo { 
-            font-size: 11px; 
-            color: #d32f2f; 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            margin-bottom: 6px; 
-        }
-
+        .corpo { padding: 10px; flex: 1; display: flex; flex-direction: column; }
+        .tipo { font-size: 10px; color: #d32f2f; font-weight: 900; text-transform: uppercase; margin-bottom: 4px; }
         .titulo { 
-            font-size: 15px; 
+            font-size: 14px; 
             font-weight: bold; 
             line-height: 1.3; 
             color: #001a33;
             display: -webkit-box;
-            -webkit-line-clamp: 3; /* Mostra até 3 linhas de título */
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -105,7 +82,6 @@
 
     <script>
         async function carregar() {
-            // URL da sua API atualizada
             const url = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec";
             const imgMuralPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
 
@@ -115,31 +91,25 @@
                 const container = document.getElementById('lista');
                 const agora = new Date().getTime();
 
-                // Filtra apenas notícias das últimas 24 horas
                 const filtradas = dados.filter(item => {
                     if(!item.data) return false;
-                    const dataNoticia = new Date(item.data).getTime();
-                    return (agora - dataNoticia) < 86400000;
+                    return (agora - new Date(item.data).getTime()) < 86400000;
                 });
                 
                 if (filtradas.length === 0) {
-                    container.innerHTML = "<p style='padding:50px; color:#999; text-align:center; width:100%;'>Sem novidades nas últimas 24h.</p>";
+                    container.innerHTML = "<p style='padding:40px; color:#999; text-align:center; width:100%; font-size:13px;'>Sem novidades nas últimas 24h.</p>";
                     return;
                 }
 
-                // Renderiza os cards (do mais novo para o mais antigo)
                 container.innerHTML = filtradas.reverse().map(item => {
                     const linkOriginal = item.link || "";
                     const ytMatch = linkOriginal.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
                     const ytId = ytMatch ? ytMatch[1] : null;
                     
                     let imgFinal;
-
                     if (ytId) {
-                        // Miniatura do YouTube
                         imgFinal = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
                     } else {
-                        // Usa o que estiver na Coluna F (capa), ou o mural padrão
                         imgFinal = (item.capa && item.capa.trim().length > 10) ? item.capa : imgMuralPadrao;
                     }
                     
@@ -154,10 +124,7 @@
                             </div>
                         </a>`;
                 }).join('');
-            } catch (e) { 
-                console.error("Erro ao carregar dados:", e);
-                document.getElementById('lista').innerHTML = "<p style='padding:20px;'>Erro ao carregar notícias.</p>";
-            }
+            } catch (e) { console.error(e); }
         }
         carregar();
     </script>
