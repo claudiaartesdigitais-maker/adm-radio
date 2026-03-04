@@ -24,7 +24,6 @@
     <script>
         async function carregar() {
             const url = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec";
-            // Forçamos o link direto da imagem para evitar falhas de cache
             const imgMuralPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png?t=" + new Date().getTime();
 
             try {
@@ -44,20 +43,34 @@
                 }
 
                 container.innerHTML = filtradas.reverse().map(item => {
-                    const linkOriginal = item.link || "";
+                    const linkOriginal = (item.link || "").trim();
+                    const linkLower = linkOriginal.toLowerCase();
                     const ytMatch = linkOriginal.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
                     const ytId = ytMatch ? ytMatch[1] : null;
                     
                     let imgFinal;
                     
-                    // LÓGICA DE IMAGEM REVISADA:
-                    if (ytId) {
+                    // 1. Checa se é REDE SOCIAL (Facebook, Instagram, Kwai, TikTok) -> PRIORIDADE MURAL
+                    if (
+                        linkLower.includes("facebook") || 
+                        linkLower.includes("fb.watch") || 
+                        linkLower.includes("fb.com") || 
+                        linkLower.includes("instagram") || 
+                        linkLower.includes("tiktok") || 
+                        linkLower.includes("kwai")
+                    ) {
+                        imgFinal = imgMuralPadrao;
+                    } 
+                    // 2. Se for YouTube Puro (fora de rede social) -> Puxa capa do YT
+                    else if (ytId) {
                         imgFinal = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-                    } else if (item.capa && item.capa.trim().length > 15 && item.capa.startsWith('http')) {
-                        // Só usa a capa da planilha se for um link de imagem válido
+                    } 
+                    // 3. Se tiver capa personalizada na planilha -> Usa a capa
+                    else if (item.capa && item.capa.trim().length > 15 && item.capa.startsWith('http')) {
                         imgFinal = item.capa;
-                    } else {
-                        // Para Facebook ou qualquer outro link sem foto na planilha, USA O MURAL
+                    } 
+                    // 4. Fallback final -> Usa o Mural
+                    else {
                         imgFinal = imgMuralPadrao;
                     }
                     
