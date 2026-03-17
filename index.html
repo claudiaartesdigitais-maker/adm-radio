@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        body, html { margin: 0; padding: 0; background: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; overflow: hidden; height: 480px; }
+        body, html { margin: 0; padding: 0; background: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; }
         .mural-titulo { padding: 15px 18px 8px 18px; font-size: 22px; font-weight: 900; color: #001a33; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
         .mural-titulo::before { content: ''; width: 5px; height: 22px; background: #d32f2f; border-radius: 2px; }
         .feed-container { display: flex; flex-direction: row; overflow-x: auto; padding: 10px 15px 35px 15px; gap: 18px; -webkit-overflow-scrolling: touch; }
@@ -32,6 +32,7 @@
                 const container = document.getElementById('lista');
                 const agora = new Date().getTime();
 
+                // Filtra apenas o que tem menos de 24 horas
                 const filtradas = dados.filter(item => {
                     if(!item.data) return false;
                     return (agora - new Date(item.data).getTime()) < 86400000;
@@ -50,27 +51,14 @@
                     
                     let imgFinal;
                     
-                    // 1. Checa se é REDE SOCIAL (Facebook, Instagram, Kwai, TikTok) -> PRIORIDADE MURAL
-                    if (
-                        linkLower.includes("facebook") || 
-                        linkLower.includes("fb.watch") || 
-                        linkLower.includes("fb.com") || 
-                        linkLower.includes("instagram") || 
-                        linkLower.includes("tiktok") || 
-                        linkLower.includes("kwai")
-                    ) {
+                    // Lógica das imagens
+                    if (linkLower.includes("facebook") || linkLower.includes("fb.watch") || linkLower.includes("fb.com") || linkLower.includes("instagram") || linkLower.includes("tiktok") || linkLower.includes("kwai")) {
                         imgFinal = imgMuralPadrao;
-                    } 
-                    // 2. Se for YouTube Puro (fora de rede social) -> Puxa capa do YT
-                    else if (ytId) {
+                    } else if (ytId) {
                         imgFinal = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-                    } 
-                    // 3. Se tiver capa personalizada na planilha -> Usa a capa
-                    else if (item.capa && item.capa.trim().length > 15 && item.capa.startsWith('http')) {
+                    } else if (item.capa && item.capa.trim().length > 15 && item.capa.startsWith('http')) {
                         imgFinal = item.capa;
-                    } 
-                    // 4. Fallback final -> Usa o Mural
-                    else {
+                    } else {
                         imgFinal = imgMuralPadrao;
                     }
                     
@@ -85,5 +73,13 @@
                             </div>
                         </a>`;
                 }).join('');
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error(e); 
+            }
         }
+
+        // Chama a função para carregar os dados
+        carregar();
+    </script>
+</body>
+</html>
