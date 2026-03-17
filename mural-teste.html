@@ -34,21 +34,23 @@
     <script>
         const imgMuralPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png?t=" + new Date().getTime();
 
+        // 1. NOTÍCIAS 24 HORAS (Link original mantido)
         async function carregarNoticias() {
             const url = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec";
             try {
                 const res = await fetch(url);
                 const dados = await res.json(); 
-                document.getElementById('lista').innerHTML = renderizarCards(dados, false, 1); // 1 dia
+                document.getElementById('lista').innerHTML = renderizarCards(dados, false, 1); 
             } catch (e) { console.error(e); }
         }
 
+        // 2. DESTAQUES DA SEMANA (Link atualizado para a aba correta)
         async function carregarDestaques() {
-            const urlDestaques = "https://script.google.com/macros/s/AKfycbxNzDvifH0pv74i5E7BUS-scdfujI7mRLymYcOmCJDN3JH4AeGAThfHZoGDt2xS228zWw/exec?aba=Destaques";
+            const urlDestaques = "https://script.google.com/macros/s/AKfycbxNzDvifH0pv74i5E7BUS-scdfujI7mRLymYcOmCJDN3JH4AeGAThfHZoGDt2xS228zWw/exec?aba=Respostas ao formulário 1";
             try {
                 const res = await fetch(urlDestaques);
                 const dados = await res.json(); 
-                document.getElementById('lista-destaques').innerHTML = renderizarCards(dados, true, 7); // 7 dias
+                document.getElementById('lista-destaques').innerHTML = renderizarCards(dados, true, 7); 
             } catch (e) { console.error(e); }
         }
 
@@ -71,12 +73,9 @@
                 
                 let imgFinal;
 
-                // --- LÓGICA DE PRIORIDADE PARA IMAGEM ---
-                // Se for Destaque E tiver um link na coluna de imagem/link, USA ELE (a foto do Drive)
-                if (isDestaque && linkOriginal.includes("drive.google.com")) {
+                if (linkOriginal.includes("drive.google.com")) {
                     imgFinal = linkOriginal; 
                 } 
-                // Senão, segue a lógica padrão de redes sociais e YouTube
                 else if (linkLower.includes("facebook") || linkLower.includes("fb.watch") || linkLower.includes("instagram") || linkLower.includes("tiktok")) {
                     imgFinal = imgMuralPadrao;
                 } else if (ytId) {
@@ -96,7 +95,7 @@
                             <img src="${imgFinal}" class="thumb" onerror="this.src='${imgMuralPadrao}'">
                         </div>
                         <div class="corpo">
-                            <span class="tipo ${badgeCor}">${icone} ${(item.tipo || 'Destaque')}</span>
+                            <span class="tipo ${badgeCor}">${icone} ${(item.tipo || 'Postagem')}</span>
                             <div class="titulo">${item.titulo}</div>
                         </div>
                     </a>`;
