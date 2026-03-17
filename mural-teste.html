@@ -2,118 +2,136 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destaques da Rádio</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
-        body, html { margin: 0; padding: 0; background: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; }
-        .mural-titulo { padding: 15px 18px 8px 18px; font-size: 22px; font-weight: 900; color: #001a33; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
-        .mural-titulo::before { content: ''; width: 5px; height: 22px; background: #d32f2f; border-radius: 2px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #ffffff; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; }
+        .header-faixa { width: 100%; background-color: #001f3f; color: #ffffff; padding: 12px 0; text-align: center; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; }
+        .swiper { width: 100%; padding: 20px 0 50px 0; }
+        .swiper-slide { width: 85%; display: flex; flex-direction: column; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #eee; }
+        .media-container { width: 100%; height: 280px; background: #000; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .media-container img { width: 100%; height: 100%; object-fit: cover; }
+        .media-container iframe { width: 100%; height: 100%; border: none; }
         
-        .titulo-destaque::before { background: #b8860b; }
-        .titulo-destaque { color: #b8860b; }
+        .info { padding: 12px; text-align: left; background: #fff; position: relative; min-height: 80px; }
+        .info h3 { margin: 0; font-size: 0.95rem; color: #001f3f; font-weight: bold; text-transform: uppercase; }
+        .info p { margin: 5px 0 0; color: #444; font-size: 0.85rem; line-height: 1.4; padding-right: 50px; }
 
-        .feed-container { display: flex; flex-direction: row; overflow-x: auto; padding: 10px 15px 35px 15px; gap: 18px; -webkit-overflow-scrolling: touch; }
-        .feed-container::-webkit-scrollbar { display: none; }
-        .card { flex: 0 0 300px; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.12); text-decoration: none; color: #333; height: 400px; display: flex; flex-direction: column; border: 1px solid #eee; overflow: hidden; }
-        .thumb-container { width: 100%; height: 200px; background: #000; overflow: hidden; }
-        .thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .corpo { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: flex-start; }
-        .tipo { font-size: 12px; color: #d32f2f; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; }
-        .tipo-destaque { color: #b8860b; }
-        .titulo { font-size: 18px; font-weight: bold; line-height: 1.4; color: #001a33; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+        /* BOTÃO CURTIR */
+        .like-container { position: absolute; right: 10px; bottom: 12px; display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 10; }
+        .like-btn { font-size: 1.5rem; color: #ccc; transition: transform 0.2s; }
+        .like-btn.active { color: #d32f2f; }
+        .like-count { font-size: 0.75rem; color: #666; font-weight: bold; }
+        
+        .swiper-pagination-bullet-active { background: #001f3f !important; }
+        .loading { padding: 50px; text-align: center; color: #888; width: 100%; }
     </style>
 </head>
 <body>
-    <div class="mural-titulo">Notícias 24 horas</div>
-    <div id="lista" class="feed-container"></div>
 
-    <hr style="border:0; border-top:1px solid #eee; margin: 10px 0;">
+    <div class="header-faixa">Destaques da Semana</div>
 
-    <div class="mural-titulo titulo-destaque">Destaques da Semana</div>
-    <div id="lista-destaques" class="feed-container"></div>
+    <div class="swiper mySwiper">
+        <div class="swiper-wrapper" id="container-radio">
+            <div class="loading">Buscando atualizações...</div>
+        </div>
+        <div class="swiper-pagination"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <script>
-        const imgMuralPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png?t=" + new Date().getTime();
+        // SEU LINK DO APPS SCRIPT ATUALIZADO E APONTANDO PARA A ABA CORRETA
+        const urlAppScript = "https://script.google.com/macros/s/AKfycbxNzDvifH0pv74i5E7BUS-scdfujI7mRLymYcOmCJDN3JH4AeGAThfHZoGDt2xS228zWw/exec?aba=Respostas ao formulário 1";
 
-        // 1. NOTÍCIAS 24 HORAS (TOTALMENTE PRESERVADO)
-        async function carregarNoticias() {
-            const url = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec";
+        async function curtir(linha, btnElement) {
+            const countElement = btnElement.nextElementSibling;
+            btnElement.style.transform = "scale(1.3)";
+            setTimeout(() => btnElement.style.transform = "scale(1)", 200);
+            
+            btnElement.classList.add('active');
+            btnElement.innerHTML = "❤️";
+
             try {
-                const res = await fetch(url);
-                const dados = await res.json(); 
-                document.getElementById('lista').innerHTML = renderizarCards(dados, false, 1); 
-            } catch (e) { console.error(e); }
+                // Remove o parâmetro da aba para o POST, enviando apenas para o script principal
+                const urlPost = urlAppScript.split('?')[0];
+                await fetch(urlPost, {
+                    method: 'POST',
+                    mode: 'no-cors', // Necessário para evitar erro de redirecionamento do Google
+                    body: JSON.stringify({ linha: linha })
+                });
+                
+                // Incrementa visualmente para dar resposta imediata ao usuário
+                let atual = parseInt(countElement.innerText) || 0;
+                countElement.innerText = atual + 1;
+            } catch (e) { console.error("Erro ao curtir"); }
         }
 
-        // 2. DESTAQUES DA SEMANA (AJUSTADO PARA A ABA CORRETA)
-        async function carregarDestaques() {
-            const urlDestaques = "https://script.google.com/macros/s/AKfycbxNzDvifH0pv74i5E7BUS-scdfujI7mRLymYcOmCJDN3JH4AeGAThfHZoGDt2xS228zWw/exec?aba=Respostas ao formulário 1";
+        async function carregarPosts() {
+            const container = document.getElementById('container-radio');
             try {
-                const res = await fetch(urlDestaques);
-                const dados = await res.json(); 
-                document.getElementById('lista-destaques').innerHTML = renderizarCards(dados, true, 7); 
-            } catch (e) { console.error(e); }
-        }
+                const response = await fetch(urlAppScript);
+                const dados = await response.json();
+                container.innerHTML = '';
 
-        function renderizarCards(lista, isDestaque, diasFiltro) {
-            const agora = new Date().getTime();
-            const limiteMs = diasFiltro * 24 * 60 * 60 * 1000;
-
-            const filtradas = lista.filter(item => {
-                if(!item.data) return false;
-                return (agora - new Date(item.data).getTime()) < limiteMs;
-            });
-
-            if (filtradas.length === 0) return "<p style='padding:50px; color:#999; text-align:center; width:100%; font-size:16px;'>Sem postagens recentes.</p>";
-
-            return filtradas.reverse().map(item => {
-                // Prioriza o link da Coluna E (processado) se ele existir, senão usa o da D
-                const linkOriginal = (item.link || "").trim();
-                const linkParaImagem = (item.capa && item.capa.includes("drive.google.com")) ? item.capa : linkOriginal;
-                
-                const linkLower = linkParaImagem.toLowerCase();
-                const ytMatch = linkParaImagem.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
-                const ytId = ytMatch ? ytMatch[1] : null;
-                
-                let imgFinal;
-
-                // CORREÇÃO PARA O GOOGLE DRIVE
-                if (linkParaImagem.includes("drive.google.com")) {
-                    const idArquivo = linkParaImagem.match(/[-\w]{25,}/);
-                    if (idArquivo) {
-                        // Formato uc?export=view é o que permite a imagem aparecer no site
-                        imgFinal = `https://drive.google.com/uc?export=view&id=${idArquivo[0]}`;
-                    } else {
-                        imgFinal = imgMuralPadrao;
-                    }
-                } 
-                else if (linkLower.includes("facebook") || linkLower.includes("fb.watch") || linkLower.includes("instagram") || linkLower.includes("tiktok")) {
-                    imgFinal = imgMuralPadrao;
-                } else if (ytId) {
-                    imgFinal = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-                } else if (item.capa && item.capa.length > 15) {
-                    imgFinal = item.capa;
-                } else {
-                    imgFinal = imgMuralPadrao;
+                if (!dados || dados.length === 0) {
+                    container.innerHTML = '<div class="loading">Nenhum destaque encontrado.</div>';
+                    return;
                 }
-                
-                const badgeCor = isDestaque ? 'tipo-destaque' : '';
-                const icone = isDestaque ? '✨' : '⌚';
 
-                return `
-                    <a href="${linkOriginal}" target="_blank" class="card">
-                        <div class="thumb-container">
-                            <img src="${imgFinal}" class="thumb" onerror="this.src='${imgMuralPadrao}'">
+                dados.forEach(item => {
+                    const slide = document.createElement('div');
+                    slide.className = 'swiper-slide';
+
+                    let linkMidia = item.link || "";
+                    let htmlConteudo = "";
+
+                    // LÓGICA DE TRATAMENTO DE IMAGEM DO GOOGLE DRIVE
+                    if (linkMidia.includes("drive.google.com")) {
+                        const idDoc = linkMidia.match(/[-\w]{25,}/);
+                        if (idDoc) {
+                            linkMidia = `https://drive.google.com/uc?export=view&id=${idDoc[0]}`;
+                        }
+                    }
+
+                    if (item.tipo && item.tipo.toLowerCase() === 'video') {
+                        htmlConteudo = `<iframe src="${linkMidia}" allow="autoplay"></iframe>`;
+                    } else {
+                        // REMOVIDO O FALLBACK PARA MURAL.PNG AQUI
+                        htmlConteudo = `<img src="${linkMidia}">`;
+                    }
+
+                    slide.innerHTML = `
+                        <div class="media-container">
+                            ${htmlConteudo}
                         </div>
-                        <div class="corpo">
-                            <span class="tipo ${badgeCor}">${icone} ${(item.tipo || 'Postagem')}</span>
-                            <div class="titulo">${item.titulo}</div>
+                        <div class="info">
+                            <h3>${item.apresentador || "Rádio"}</h3>
+                            <p>${item.titulo || ""}</p>
+                            <div class="like-container" onclick="curtir(${item.id}, this.querySelector('.like-btn'))">
+                                <span class="like-btn">🤍</span>
+                                <span class="like-count">${item.curtidas || 0}</span>
+                            </div>
                         </div>
-                    </a>`;
-            }).join('');
+                    `;
+                    container.appendChild(slide);
+                });
+
+                // Inicia o Swiper após carregar os dados
+                new Swiper(".mySwiper", { 
+                    slidesPerView: "auto", 
+                    centeredSlides: true, 
+                    spaceBetween: 15, 
+                    pagination: { el: ".swiper-pagination", clickable: true } 
+                });
+            } catch (error) { 
+                console.error(error);
+                container.innerHTML = '<div class="loading">Erro ao carregar destaques.</div>'; 
+            }
         }
-
-        carregarNoticias();
-        carregarDestaques();
+        
+        carregarPosts();
     </script>
 </body>
 </html>
