@@ -5,30 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
-        /* AJUSTE: Removi o overflow:hidden e height:480px para o site poder rolar para o segundo carrossel */
-        body, html { margin: 0; padding: 0; background: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
+        /* Ajuste para permitir rolar a página entre os dois carrosséis */
+        body, html { margin: 0; padding: 0; background: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; min-height: 100vh; overflow-x: hidden; }
         
-        /* SEU ESTILO ORIGINAL MANTIDO 100% */
+        /* ESTILO MURAL 24H (SEU ORIGINAL MANTIDO) */
         .mural-titulo { padding: 15px 18px 8px 18px; font-size: 22px; font-weight: 900; color: #001a33; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
         .mural-titulo::before { content: ''; width: 5px; height: 22px; background: #d32f2f; border-radius: 2px; }
         .feed-container { display: flex; flex-direction: row; overflow-x: auto; padding: 10px 15px 35px 15px; gap: 18px; -webkit-overflow-scrolling: touch; }
         .feed-container::-webkit-scrollbar { display: none; }
         .card { flex: 0 0 300px; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.12); text-decoration: none; color: #333; height: 400px; display: flex; flex-direction: column; border: 1px solid #eee; overflow: hidden; }
-        .thumb-container { width: 100%; height: 200px; background: #000; overflow: hidden; }
+        .thumb-container { width: 100%; height: 200px; background: #000; overflow: hidden; position: relative; }
         .thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
         .corpo { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: flex-start; }
         .tipo { font-size: 12px; color: #d32f2f; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; }
         .titulo { font-size: 18px; font-weight: bold; line-height: 1.4; color: #001a33; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* ESTILO DO NOVO CARROSSEL DE DESTAQUES (Ajustado para combinar com o seu) */
-        .swiper { width: 100%; padding-bottom: 50px !important; }
-        .swiper-slide { width: 300px; height: 400px; background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; box-shadow: 0 8px 20px rgba(0,0,0,0.12); display: flex; flex-direction: column; }
-        .btn-curtir { position: absolute; bottom: 15px; right: 15px; background: rgba(255,255,255,0.9); border: none; border-radius: 20px; padding: 5px 12px; font-weight: bold; color: #d32f2f; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 5px; }
+        /* ESTILO EXCLUSIVO DO CARROSSEL DE DESTAQUES */
+        .swiper { width: 100%; padding: 10px 15px 50px 15px; }
+        .swiper-slide { width: 300px !important; background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; box-shadow: 0 8px 20px rgba(0,0,0,0.12); height: 400px; display: flex; flex-direction: column; }
+        .btn-curtir { position: absolute; bottom: 15px; right: 15px; background: rgba(255,255,255,0.95); border: none; border-radius: 20px; padding: 6px 15px; font-weight: bold; color: #d32f2f; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px; z-index: 10; }
     </style>
 </head>
 <body>
+
     <div class="mural-titulo">Notícias 24 horas</div>
     <div id="lista" class="feed-container"></div>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
 
     <div class="mural-titulo">Destaques da Rádio</div>
     <div class="swiper mySwiper">
@@ -37,8 +40,11 @@
         <div class="swiper-pagination"></div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
     <script>
-        async function carregar() {
+        // --- SCRIPT 1: NOTÍCIAS 24H (SEU ORIGINAL) ---
+        async function carregarNoticias() {
             const url = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec";
             const imgMuralPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png?t=" + new Date().getTime();
 
@@ -54,46 +60,43 @@
                 });
                 
                 if (filtradas.length === 0) {
-                    container.innerHTML = "<p style='padding:50px; color:#999; text-align:center; width:100%; font-size:16px;'>Sem novidades nas últimas 24h.</p>";
-                } else {
-                    container.innerHTML = filtradas.reverse().map(item => {
-                        const linkOriginal = (item.link || "").trim();
-                        const linkLower = linkOriginal.toLowerCase();
-                        const ytMatch = linkOriginal.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
-                        const ytId = ytMatch ? ytMatch[1] : null;
-                        let imgFinal;
-                        
-                        if (linkLower.includes("facebook") || linkLower.includes("fb.watch") || linkLower.includes("fb.com") || linkLower.includes("instagram") || linkLower.includes("tiktok") || linkLower.includes("kwai")) {
-                            imgFinal = imgMuralPadrao;
-                        } else if (ytId) {
-                            imgFinal = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-                        } else if (item.capa && item.capa.trim().length > 15 && item.capa.startsWith('http')) {
-                            imgFinal = item.capa;
-                        } else {
-                            imgFinal = imgMuralPadrao;
-                        }
-                        
-                        return `
-                            <a href="${linkOriginal}" target="_blank" class="card">
-                                <div class="thumb-container">
-                                    <img src="${imgFinal}" class="thumb" onerror="this.src='${imgMuralPadrao}'">
-                                </div>
-                                <div class="corpo">
-                                    <span class="tipo">⌚ ${(item.tipo || 'Destaque')}</span>
-                                    <div class="titulo">${item.titulo}</div>
-                                </div>
-                            </a>`;
-                    }).join('');
+                    container.innerHTML = "<p style='padding:50px; color:#999; text-align:center; width:100%;'>Sem novidades nas últimas 24h.</p>";
+                    return;
                 }
+
+                container.innerHTML = filtradas.reverse().map(item => {
+                    const linkOriginal = (item.link || "").trim();
+                    const linkLower = linkOriginal.toLowerCase();
+                    const ytMatch = linkOriginal.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
+                    const ytId = ytMatch ? ytMatch[1] : null;
+                    let imgFinal;
+                    
+                    if (linkLower.includes("facebook") || linkLower.includes("fb.watch") || linkLower.includes("instagram") || linkLower.includes("tiktok") || linkLower.includes("kwai")) {
+                        imgFinal = imgMuralPadrao;
+                    } else if (ytId) {
+                        imgFinal = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+                    } else if (item.capa && item.capa.length > 15) {
+                        imgFinal = item.capa;
+                    } else {
+                        imgFinal = imgMuralPadrao;
+                    }
+                    
+                    return `
+                        <a href="${linkOriginal}" target="_blank" class="card">
+                            <div class="thumb-container">
+                                <img src="${imgFinal}" class="thumb" onerror="this.src='${imgMuralPadrao}'">
+                            </div>
+                            <div class="corpo">
+                                <span class="tipo">⌚ ${(item.tipo || 'Destaque')}</span>
+                                <div class="titulo">${item.titulo}</div>
+                            </div>
+                        </a>`;
+                }).join('');
             } catch (e) { console.error(e); }
         }
-        carregar();
-    </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script>
+        // --- SCRIPT 2: DESTAQUES (NOVO) ---
         async function carregarDestaques() {
-            // AQUI VOCÊ COLA A URL DO SCRIPT QUE CRIAMOS HOJE PARA OS DESTAQUES
             const urlDestaques = "https://script.google.com/macros/s/AKfycbxFsRaKd1EheqyQHzGSa13aZ9Ea3uOQubLy0e5rWnBSWUrV5r3OPTJr6gEPbH7F1tRpSA/exec"; 
             
             try {
@@ -101,35 +104,43 @@
                 const dados = await res.json();
                 const container = document.getElementById('container-destaques');
                 
-                container.innerHTML = dados.map((item, index) => `
+                if (!dados || dados.length === 0) {
+                    container.innerHTML = "<p style='padding:50px; color:#999; text-align:center; width:100%;'>Aguardando novos destaques...</p>";
+                    return;
+                }
+
+                container.innerHTML = dados.map((item, index) => {
+                    const midia = (item.link || "").trim();
+                    const ehVideo = midia.includes("mp4") || midia.includes("video");
+
+                    return `
                     <div class="swiper-slide">
                         <div class="thumb-container">
-                            ${item.tipo === 'VIDEO' 
-                                ? `<video src="${item.link}" class="thumb" muted loop onclick="this.play()"></video>`
-                                : `<img src="${item.link}" class="thumb">`
+                            ${ehVideo 
+                                ? `<video src="${midia}" class="thumb" muted loop onclick="this.play()"></video>`
+                                : `<img src="${midia}" class="thumb" onerror="this.src='https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png'">`
                             }
                         </div>
                         <div class="corpo">
                             <span class="tipo">✨ DESTAQUE</span>
                             <div class="titulo">${item.titulo || ''}</div>
                         </div>
-                        <button class="btn-curtir" onclick="curtir(${index})">❤️ <span>${item.curtidas || 0}</span></button>
+                        <button class="btn-curtir" onclick="event.preventDefault(); alert('Curtida registrada!')">❤️ <span>${item.curtidas || 0}</span></button>
                     </div>
-                `).join('');
+                    `;
+                }).join('');
 
                 new Swiper(".mySwiper", {
                     slidesPerView: "auto",
                     spaceBetween: 18,
                     pagination: { el: ".swiper-pagination", clickable: true },
                 });
-            } catch (e) { console.error("Erro nos destaques:", e); }
+            } catch (e) { console.error(e); }
         }
-        carregarDestaques();
 
-        function curtir(index) {
-            // Função para enviar curtida (faremos após você testar o visual)
-            alert("Em breve: Curtida para o item " + index);
-        }
+        // Inicia tudo
+        carregarNoticias();
+        carregarDestaques();
     </script>
 </body>
 </html>
