@@ -1,1 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Rádio - Postagem Unificada</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        h2 { color: #004a99; text-align: center; margin-bottom: 20px; text-transform: uppercase; font-size: 18px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        
+        .botoes-container { display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 15px 5px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.3s; text-transform: uppercase; }
+        
+        /* Cor do botão das Notícias 24h (O que já existia) */
+        .btn-24h { background: #004a99; }
+        .btn-24h:hover { background: #003366; }
+        
+        /* Cor do botão dos Destaques (O novo com Drive) */
+        .btn-destaque { background: #b8860b; }
+        .btn-destaque:hover { background: #8b6508; }
 
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        #mensagem { text-align: center; font-weight: bold; padding: 10px; display: none; margin-top: 15px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Publicar no Site</h2>
+    
+    <label>Link da Notícia/Vídeo/Drive</label>
+    <input type="text" id="link" placeholder="Cole o link aqui...">
+
+    <label>Título da Postagem</label>
+    <input type="text" id="titulo" placeholder="Digite o título...">
+
+    <label>Tipo</label>
+    <select id="tipo">
+        <option value="NOTICIA">📰 NOTÍCIA / IMAGEM</option>
+        <option value="VIDEO">▶ VÍDEO</option>
+    </select>
+
+    <div class="botoes-container">
+        <button id="btn24h" class="btn btn-24h" onclick="enviar('24h')">Postar no<br>Mural 24h</button>
+        <button id="btnDestaque" class="btn btn-destaque" onclick="enviar('destaque')">Postar nos<br>Destaques</button>
+    </div>
+
+    <div id="mensagem"></div>
+</div>
+
+<script>
+    async function enviar(destino) {
+        const link = document.getElementById('link').value;
+        const titulo = document.getElementById('titulo').value;
+        const tipo = document.getElementById('tipo').value;
+        const msg = document.getElementById('mensagem');
+        
+        // --- LINKS DOS SCRIPTS (AJUSTE AQUI) ---
+        const LINK_NOTICIAS_24H = "COLOQUE_AQUI_O_LINK_ANTIGO_DA_SISTEMA_RADIO"; 
+        const LINK_DESTAQUES = "https://script.google.com/macros/s/AKfycbwY0_wrO28yeXPNqNF0PbAxswS1o6WkOaZzbOjnIJhK0uJAe2aKpbTcYVLoaU8VD9tGBw/exec";
+
+        if(!link || !titulo) {
+            alert("Preencha o link e o título!");
+            return;
+        }
+
+        // Define qual link usar
+        const urlFinal = (destino === '24h') ? LINK_NOTICIAS_24H : LINK_DESTAQUES;
+        
+        // Bloqueia botões
+        document.getElementById('btn24h').disabled = true;
+        document.getElementById('btnDestaque').disabled = true;
+        msg.style.display = "block";
+        msg.style.background = "#fff3cd";
+        msg.style.color = "#856404";
+        msg.innerText = "Enviando...";
+
+        const payload = {
+            link: link,
+            titulo: titulo,
+            tipo: tipo,
+            destino: "Destaques" // Nome da aba na planilha nova
+        };
+
+        try {
+            await fetch(urlFinal, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(payload)
+            });
+            
+            msg.style.background = "#d4edda";
+            msg.style.color = "#155724";
+            msg.innerText = "✅ Sucesso! Publicado com sucesso.";
+            
+            document.getElementById('link').value = "";
+            document.getElementById('titulo').value = "";
+        } catch (error) {
+            msg.style.background = "#f8d7da";
+            msg.style.color = "#721c24";
+            msg.innerText = "❌ Erro ao publicar.";
+        } finally {
+            document.getElementById('btn24h').disabled = false;
+            document.getElementById('btnDestaque').disabled = false;
+        }
+    }
+</script>
+
+</body>
+</html>
