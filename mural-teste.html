@@ -1,3 +1,8 @@
+Compreendido. Vou te passar o código completo mantendo a estrutura original que você gosta. A única alteração será na lógica interna da função de Destaques para que ela aponte para a aba correta e consiga transformar os links do Google Drive em imagens visíveis.
+
+Aqui está o arquivo completo para você copiar e colar no GitHub:
+
+HTML
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -34,7 +39,7 @@
     <script>
         const imgMuralPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png?t=" + new Date().getTime();
 
-        // 1. NOTÍCIAS 24 HORAS (Link original mantido)
+        // --- NOTÍCIAS 24 HORAS (INTOCADO) ---
         async function carregarNoticias() {
             const url = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec";
             try {
@@ -44,8 +49,9 @@
             } catch (e) { console.error(e); }
         }
 
-        // 2. DESTAQUES DA SEMANA (Link atualizado para a aba correta)
+        // --- DESTAQUES DA SEMANA (ATUALIZADO PARA A NOVA ABA) ---
         async function carregarDestaques() {
+            // Usando seu link mais recente e apontando para a aba correta
             const urlDestaques = "https://script.google.com/macros/s/AKfycbxNzDvifH0pv74i5E7BUS-scdfujI7mRLymYcOmCJDN3JH4AeGAThfHZoGDt2xS228zWw/exec?aba=Respostas ao formulário 1";
             try {
                 const res = await fetch(urlDestaques);
@@ -73,8 +79,15 @@
                 
                 let imgFinal;
 
+                // Lógica para converter link do Drive em imagem real
                 if (linkOriginal.includes("drive.google.com")) {
-                    imgFinal = linkOriginal; 
+                    const idArquivo = linkOriginal.match(/[-\w]{25,}/);
+                    if (idArquivo) {
+                        // Link direto que o navegador consegue exibir como imagem
+                        imgFinal = `https://drive.google.com/uc?export=view&id=${idArquivo[0]}`;
+                    } else {
+                        imgFinal = imgMuralPadrao;
+                    }
                 } 
                 else if (linkLower.includes("facebook") || linkLower.includes("fb.watch") || linkLower.includes("instagram") || linkLower.includes("tiktok")) {
                     imgFinal = imgMuralPadrao;
