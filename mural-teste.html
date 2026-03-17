@@ -35,6 +35,7 @@
         const imgMuralPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png?t=" + new Date().getTime();
 
         async function carregarNoticias() {
+            // Este link abaixo é o do seu Script Principal para Notícias
             const url = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec";
             try {
                 const res = await fetch(url);
@@ -44,9 +45,14 @@
         }
 
         async function carregarDestaques() {
-            const urlDestaques = "https://script.google.com/macros/s/AKfycbwY0_wrO28yeXPNqNF0PbAxswS1o6WkOaZzbOjnIJhK0uJAe2aKpbTcYVLoaU8VD9tGBw/exec?aba=Destaques";
+            // ATUALIZADO: Link que você me enviou para a aba Destaques
+            const urlDestaques = "https://script.google.com/macros/s/AKfycbzviewer_URL_AQUI_OU_O_LINK_ABAIXO/exec?aba=Destaques";
+            
+            // Link Real Substituído:
+            const linkOficialDestaques = "https://script.google.com/macros/s/AKfycbzJG9UsNudhLwX0U2szjje02sVqXiTuCGX43-qlAn-Kdzf_qGSNdIDpy7dQnh4oPvjlsA/exec?aba=Destaques";
+            
             try {
-                const res = await fetch(urlDestaques);
+                const res = await fetch(linkOficialDestaques);
                 const dados = await res.json(); 
                 document.getElementById('lista-destaques').innerHTML = renderizarCards(dados, true, 7); // 7 dias
             } catch (e) { console.error(e); }
@@ -71,12 +77,9 @@
                 
                 let imgFinal;
 
-                // --- LÓGICA DE PRIORIDADE PARA IMAGEM ---
-                // Se for Destaque E tiver um link na coluna de imagem/link, USA ELE (a foto do Drive)
                 if (isDestaque && linkOriginal.includes("drive.google.com")) {
                     imgFinal = linkOriginal; 
                 } 
-                // Senão, segue a lógica padrão de redes sociais e YouTube
                 else if (linkLower.includes("facebook") || linkLower.includes("fb.watch") || linkLower.includes("instagram") || linkLower.includes("tiktok")) {
                     imgFinal = imgMuralPadrao;
                 } else if (ytId) {
