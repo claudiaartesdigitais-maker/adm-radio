@@ -34,7 +34,7 @@
     <script>
         const imgMuralPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png?t=" + new Date().getTime();
 
-        // --- NOTÍCIAS 24 HORAS (INTOCADO) ---
+        // 1. NOTÍCIAS 24 HORAS (TOTALMENTE PRESERVADO)
         async function carregarNoticias() {
             const url = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec";
             try {
@@ -44,9 +44,8 @@
             } catch (e) { console.error(e); }
         }
 
-        // --- DESTAQUES DA SEMANA (ATUALIZADO PARA A NOVA ABA) ---
+        // 2. DESTAQUES DA SEMANA (AJUSTADO PARA A ABA CORRETA)
         async function carregarDestaques() {
-            // Usando seu link mais recente e apontando para a aba correta
             const urlDestaques = "https://script.google.com/macros/s/AKfycbxNzDvifH0pv74i5E7BUS-scdfujI7mRLymYcOmCJDN3JH4AeGAThfHZoGDt2xS228zWw/exec?aba=Respostas ao formulário 1";
             try {
                 const res = await fetch(urlDestaques);
@@ -67,18 +66,21 @@
             if (filtradas.length === 0) return "<p style='padding:50px; color:#999; text-align:center; width:100%; font-size:16px;'>Sem postagens recentes.</p>";
 
             return filtradas.reverse().map(item => {
+                // Prioriza o link da Coluna E (processado) se ele existir, senão usa o da D
                 const linkOriginal = (item.link || "").trim();
-                const linkLower = linkOriginal.toLowerCase();
-                const ytMatch = linkOriginal.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
+                const linkParaImagem = (item.capa && item.capa.includes("drive.google.com")) ? item.capa : linkOriginal;
+                
+                const linkLower = linkParaImagem.toLowerCase();
+                const ytMatch = linkParaImagem.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
                 const ytId = ytMatch ? ytMatch[1] : null;
                 
                 let imgFinal;
 
-                // Lógica para converter link do Drive em imagem real
-                if (linkOriginal.includes("drive.google.com")) {
-                    const idArquivo = linkOriginal.match(/[-\w]{25,}/);
+                // CORREÇÃO PARA O GOOGLE DRIVE
+                if (linkParaImagem.includes("drive.google.com")) {
+                    const idArquivo = linkParaImagem.match(/[-\w]{25,}/);
                     if (idArquivo) {
-                        // Link direto que o navegador consegue exibir como imagem
+                        // Formato uc?export=view é o que permite a imagem aparecer no site
                         imgFinal = `https://drive.google.com/uc?export=view&id=${idArquivo[0]}`;
                     } else {
                         imgFinal = imgMuralPadrao;
