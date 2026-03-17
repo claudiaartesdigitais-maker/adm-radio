@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mural de Notícias</title>
     <style>
         body, html { margin: 0; padding: 0; background: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; }
         .mural-titulo { padding: 15px 18px 8px 18px; font-size: 22px; font-weight: 900; color: #001a33; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
@@ -14,15 +13,9 @@
 
         .feed-container { display: flex; flex-direction: row; overflow-x: auto; padding: 10px 15px 35px 15px; gap: 18px; -webkit-overflow-scrolling: touch; }
         .feed-container::-webkit-scrollbar { display: none; }
-        
-        .card { flex: 0 0 300px; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.12); text-decoration: none; color: #333; height: 400px; display: flex; flex-direction: column; border: 1px solid #eee; overflow: hidden; position: relative; }
-        
-        .thumb-container { width: 100%; height: 200px; background: #000; overflow: hidden; position: relative; }
+        .card { flex: 0 0 300px; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.12); text-decoration: none; color: #333; height: 400px; display: flex; flex-direction: column; border: 1px solid #eee; overflow: hidden; }
+        .thumb-container { width: 100%; height: 200px; background: #000; overflow: hidden; }
         .thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
-        
-        /* Ícone de Play para Vídeos */
-        .play-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.6); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; pointer-events: none; }
-
         .corpo { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: flex-start; }
         .tipo { font-size: 12px; color: #d32f2f; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; }
         .tipo-destaque { color: #b8860b; }
@@ -30,89 +23,88 @@
     </style>
 </head>
 <body>
-
     <div class="mural-titulo">Notícias 24 horas</div>
-    <div id="lista" class="feed-container">Carregando notícias...</div>
+    <div id="lista" class="feed-container"></div>
 
     <hr style="border:0; border-top:1px solid #eee; margin: 10px 0;">
 
     <div class="mural-titulo titulo-destaque">Destaques da Semana</div>
-    <div id="lista-destaques" class="feed-container">Carregando destaques...</div>
+    <div id="lista-destaques" class="feed-container"></div>
 
     <script>
-        // Link do seu Web App (Apps Script) que você gerou por último
-        const URL_API = "https://script.google.com/macros/s/AKfycbxNzDvifH0pv74i5E7BUS-scdfujI7mRLymYcOmCJDN3JH4AeGAThfHZoGDt2xS228zWw/exec";
-        const imgMuralPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
+        const imgMuralPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png?t=" + new Date().getTime();
 
-        async function carregarDados() {
+        async function carregarNoticias() {
+            const url = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec";
             try {
-                // Carrega Notícias (aba padrão ou configurada no script)
-                const resNoticias = await fetch(URL_API);
-                const dadosNoticias = await resNoticias.json();
-                document.getElementById('lista').innerHTML = renderizarCards(dadosNoticias, false, 1);
+                const res = await fetch(url);
+                const dados = await res.json(); 
+                document.getElementById('lista').innerHTML = renderizarCards(dados, false, 1); // 1 dia
+            } catch (e) { console.error(e); }
+        }
 
-                // Carrega Destaques (especificando a aba no link)
-                const resDestaques = await fetch(URL_API + "?aba=Respostas ao formulário 1");
-                const dadosDestaques = await resDestaques.json();
-                document.getElementById('lista-destaques').innerHTML = renderizarCards(dadosDestaques, true, 7);
-
-            } catch (e) {
-                console.error("Erro ao carregar dados:", e);
-                document.getElementById('lista').innerHTML = "Erro ao carregar postagens.";
-            }
+        async function carregarDestaques() {
+            const urlDestaques = "https://script.google.com/macros/s/AKfycbxNzDvifH0pv74i5E7BUS-scdfujI7mRLymYcOmCJDN3JH4AeGAThfHZoGDt2xS228zWw/exec?aba=Destaques";
+            try {
+                const res = await fetch(urlDestaques);
+                const dados = await res.json(); 
+                document.getElementById('lista-destaques').innerHTML = renderizarCards(dados, true, 7); // 7 dias
+            } catch (e) { console.error(e); }
         }
 
         function renderizarCards(lista, isDestaque, diasFiltro) {
             const agora = new Date().getTime();
             const limiteMs = diasFiltro * 24 * 60 * 60 * 1000;
 
-            // Filtra por data (apenas postagens recentes)
             const filtradas = lista.filter(item => {
                 if(!item.data) return false;
                 return (agora - new Date(item.data).getTime()) < limiteMs;
             });
 
-            if (filtradas.length === 0) {
-                return "<p style='padding:40px; color:#999; text-align:center; width:100%;'>Nenhuma postagem recente encontrada.</p>";
-            }
+            if (filtradas.length === 0) return "<p style='padding:50px; color:#999; text-align:center; width:100%; font-size:16px;'>Sem postagens recentes.</p>";
 
-            return filtradas.map(item => {
+            return filtradas.reverse().map(item => {
                 const linkOriginal = (item.link || "").trim();
-                const tipoConteudo = (item.tipo || "IMAGE").toUpperCase();
+                const linkLower = linkOriginal.toLowerCase();
+                const ytMatch = linkOriginal.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
+                const ytId = ytMatch ? ytMatch[1] : null;
                 
-                let htmlMidia;
-                
-                // Se for VIDEO, tentamos mostrar uma prévia ou ícone
-                if (tipoConteudo === "VIDEO") {
-                    htmlMidia = `
-                        <div class="thumb-container">
-                            <div class="play-icon">▶</div>
-                            <img src="${imgMuralPadrao}" class="thumb" style="opacity: 0.5;">
-                        </div>`;
-                } else {
-                    // Se for imagem, usa o link processado da coluna E
-                    htmlMidia = `
-                        <div class="thumb-container">
-                            <img src="${item.link}" class="thumb" onerror="this.src='${imgMuralPadrao}'">
-                        </div>`;
-                }
+                let imgFinal;
 
+                // --- LÓGICA DE PRIORIDADE PARA IMAGEM ---
+                // Se for Destaque E tiver um link na coluna de imagem/link, USA ELE (a foto do Drive)
+                if (isDestaque && linkOriginal.includes("drive.google.com")) {
+                    imgFinal = linkOriginal; 
+                } 
+                // Senão, segue a lógica padrão de redes sociais e YouTube
+                else if (linkLower.includes("facebook") || linkLower.includes("fb.watch") || linkLower.includes("instagram") || linkLower.includes("tiktok")) {
+                    imgFinal = imgMuralPadrao;
+                } else if (ytId) {
+                    imgFinal = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+                } else if (item.capa && item.capa.length > 15) {
+                    imgFinal = item.capa;
+                } else {
+                    imgFinal = imgMuralPadrao;
+                }
+                
                 const badgeCor = isDestaque ? 'tipo-destaque' : '';
                 const icone = isDestaque ? '✨' : '⌚';
 
                 return `
                     <a href="${linkOriginal}" target="_blank" class="card">
-                        ${htmlMidia}
+                        <div class="thumb-container">
+                            <img src="${imgFinal}" class="thumb" onerror="this.src='${imgMuralPadrao}'">
+                        </div>
                         <div class="corpo">
-                            <span class="tipo ${badgeCor}">${icone} ${item.apresentador || tipoConteudo}</span>
-                            <div class="titulo">${item.titulo || "Sem título"}</div>
+                            <span class="tipo ${badgeCor}">${icone} ${(item.tipo || 'Destaque')}</span>
+                            <div class="titulo">${item.titulo}</div>
                         </div>
                     </a>`;
             }).join('');
         }
 
-        // Inicia o carregamento
-        carregarDados();
+        carregarNoticias();
+        carregarDestaques();
     </script>
 </body>
 </html>
