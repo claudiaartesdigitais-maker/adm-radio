@@ -3,108 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Mestre - Rádio</title>
+    <title>Mural da Rádio</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
-        h2 { color: #004a99; text-align: center; margin-bottom: 5px; text-transform: uppercase; font-size: 18px; }
-        .instrucao { font-size: 13px; color: #666; margin-bottom: 20px; text-align: center; line-height: 1.4; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; margin: 0; padding: 15px; }
+        h2 { color: #004a99; border-left: 5px solid #004a99; padding-left: 10px; margin-top: 30px; font-size: 20px; text-transform: uppercase; }
+        .secao-destaques { color: #b8860b; border-left-color: #b8860b; }
         
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; font-size: 14px; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: #fff; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); position: relative; transition: 0.3s; }
+        .card:hover { transform: translateY(-3px); }
         
-        .botoes-container { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.3s; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .midia { width: 100%; height: 140px; object-fit: cover; display: block; background: #eee; }
+        .info { padding: 10px; }
+        .titulo { font-size: 13px; font-weight: bold; color: #333; margin: 0; line-height: 1.3; height: 34px; overflow: hidden; }
         
-        .btn-24h { background: #004a99; } /* Azul para Mural */
-        .btn-destaque { background: #b8860b; } /* Dourado para Destaques (Upload) */
-        
-        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
-        .btn:active { transform: translateY(0); }
-
-        #mensagem { text-align: center; font-weight: bold; padding: 12px; display: none; margin-top: 15px; border-radius: 8px; font-size: 14px; }
-        hr { border: 0; border-top: 1px solid #eee; margin: 25px 0; }
+        .badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: bold; }
+        .carregando { text-align: center; padding: 20px; color: #666; font-style: italic; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Central de Publicações</h2>
-    <p class="instrucao">Preencha os dados e escolha o destino abaixo.</p>
-    
-    <label>Link (YouTube / Redes Sociais)</label>
-    <input type="text" id="link" placeholder="Cole o link aqui...">
-
-    <label>Título da Postagem</label>
-    <input type="text" id="titulo" placeholder="Ex: Promoção de Verão">
-
-    <label>Tipo de Conteúdo</label>
-    <select id="tipo">
-        <option value="NOTICIA">📰 NOTÍCIA / IMAGEM</option>
-        <option value="VIDEO">▶ VÍDEO / YOUTUBE</option>
-    </select>
-
-    <div class="botoes-container">
-        <button id="btn24h" class="btn btn-24h" onclick="enviar24h()">🚀 Postar no Mural 24h</button>
-        
-        <hr style="margin: 10px 0;">
-        
-        <label style="text-align: center; width: 100%;">Possui arquivo para upload?</label>
-        <button class="btn btn-destaque" onclick="abrirFormulario()">📁 Abrir Form. Destaques</button>
+    <h2 class="secao-destaques">✨ Destaques da Semana</h2>
+    <div id="mural-destaques" class="grid">
+        <div class="carregando">Buscando destaques...</div>
     </div>
 
-    <div id="mensagem"></div>
-</div>
+    <h2>📰 Mural 24 Horas</h2>
+    <div id="mural-24h" class="grid">
+        <div class="carregando">Carregando notícias...</div>
+    </div>
 
 <script>
-    // --- INSIRA SEUS LINKS AQUI ---
-    const LINK_SCRIPT_24H = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec"; 
-    const LINK_DO_FORM_DESTAQUES = "https://script.google.com/macros/s/AKfycbwY0_wrO28yeXPNqNF0PbAxswS1o6WkOaZzbOjnIJhK0uJAe2aKpbTcYVLoaU8VD9tGBw/exec";
+    // --- LINKS DOS SEUS SCRIPTS ---
+    const LINK_NOTICIAS_24H = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec"; 
+    const LINK_DESTAQUES = "https://script.google.com/macros/s/AKfycbwY0_wrO28yeXPNqNF0PbAxswS1o6WkOaZzbOjnIJhK0uJAe2aKpbTcYVLoaU8VD9tGBw/exec?aba=Destaques";
 
-    async function enviar24h() {
-        const link = document.getElementById('link').value.trim();
-        const titulo = document.getElementById('titulo').value.trim();
-        const tipo = document.getElementById('tipo').value;
-        const msg = document.getElementById('mensagem');
-
-        if(!link || !titulo) {
-            alert("Por favor, preencha o link e o título antes de postar no Mural!");
-            return;
-        }
-
-        msg.style.display = "block";
-        msg.style.background = "#fff3cd";
-        msg.style.color = "#856404";
-        msg.innerText = "Processando postagem...";
-
+    async function carregarDados(url, containerId) {
+        const container = document.getElementById(containerId);
         try {
-            await fetch(LINK_SCRIPT_24H, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({ link: link, titulo: titulo, tipo: tipo })
+            const resposta = await fetch(url);
+            const dados = JSON.parse(await resposta.text());
+            container.innerHTML = ""; // Limpa o "carregando"
+
+            if (dados.length === 0) {
+                container.innerHTML = "<p style='padding:10px; color:#999;'>Nenhuma postagem no momento.</p>";
+                return;
+            }
+
+            dados.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                // Verifica se é vídeo ou imagem
+                let midiaHtml = "";
+                if(item.tipo === "VIDEO") {
+                    midiaHtml = `<div style="height:140px; background:#000; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;">▶</div>`;
+                } else {
+                    midiaHtml = `<img src="${item.link}" class="midia" onerror="this.src='https://via.placeholder.com/150?text=Imagem'">`;
+                }
+
+                card.innerHTML = `
+                    <span class="badge">${item.tipo}</span>
+                    ${midiaHtml}
+                    <div class="info">
+                        <p class="titulo">${item.titulo}</p>
+                    </div>
+                `;
+                
+                // Ao clicar, abre o link (YouTube ou Imagem)
+                card.onclick = () => window.open(item.link, '_blank');
+                container.appendChild(card);
             });
-            
-            msg.style.background = "#d4edda";
-            msg.style.color = "#155724";
-            msg.innerText = "✅ Sucesso! Postado no Mural 24h.";
-            
-            // Limpa os campos após o sucesso
-            document.getElementById('link').value = "";
-            document.getElementById('titulo').value = "";
         } catch (e) {
-            msg.style.background = "#f8d7da";
-            msg.style.color = "#721c24";
-            msg.innerText = "❌ Erro ao conectar com a planilha.";
+            container.innerHTML = "<p>Erro ao carregar dados.</p>";
+            console.error(e);
         }
     }
 
-    function abrirFormulario() {
-        if(LINK_DO_FORM_DESTAQUES.includes("http")) {
-            window.open(LINK_DO_FORM_DESTAQUES, '_blank');
-        } else {
-            alert("Por favor, configure o link do formulário no código.");
-        }
-    }
+    // Inicia a busca para as duas seções
+    carregarDados(LINK_DESTAQUES, "mural-destaques");
+    carregarDados(LINK_NOTICIAS_24H, "mural-24h");
 </script>
 
 </body>
