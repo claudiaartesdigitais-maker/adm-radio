@@ -5,24 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         body, html { margin: 0; padding: 0; background: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; }
-        
-        /* Título Padrão para ambos: Preto com traço Vermelho */
         .mural-titulo { padding: 15px 18px 8px 18px; font-size: 22px; font-weight: 900; color: #001a33; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
         .mural-titulo::before { content: ''; width: 5px; height: 22px; background: #d32f2f; border-radius: 2px; }
-
+        .titulo-destaque::before { background: #b8860b; }
+        .titulo-destaque { color: #b8860b; }
         .feed-container { display: flex; flex-direction: row; overflow-x: auto; padding: 10px 15px 35px 15px; gap: 18px; -webkit-overflow-scrolling: touch; }
         .feed-container::-webkit-scrollbar { display: none; }
-        
-        /* Card com altura ajustada para caber tudo */
-        .card { flex: 0 0 300px; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.12); text-decoration: none; color: #333; height: 420px; display: flex; flex-direction: column; border: 1px solid #eee; overflow: hidden; }
-        
+        .card { flex: 0 0 300px; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.12); text-decoration: none; color: #333; height: 400px; display: flex; flex-direction: column; border: 1px solid #eee; overflow: hidden; }
         .thumb-container { width: 100%; height: 200px; background: #000; overflow: hidden; }
         .thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
-        
         .corpo { padding: 15px; flex: 1; display: flex; flex-direction: column; }
-        .apresentador { font-size: 13px; font-weight: 800; color: #d32f2f; text-transform: uppercase; margin-bottom: 2px; }
-        .tipo { font-size: 11px; color: #666; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; }
-        .titulo { font-size: 17px; font-weight: bold; line-height: 1.3; color: #001a33; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .tipo { font-size: 12px; color: #d32f2f; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; }
+        .tipo-destaque { color: #b8860b; }
+        .titulo { font-size: 18px; font-weight: bold; line-height: 1.4; color: #001a33; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
     </style>
 </head>
 <body>
@@ -32,7 +27,7 @@
 
     <hr style="border:0; border-top:1px solid #eee; margin: 10px 0;">
 
-    <div class="mural-titulo">Destaques da Semana</div>
+    <div class="mural-titulo titulo-destaque">Destaques da Semana</div>
     <div id="lista-destaques" class="feed-container"></div>
 
     <script>
@@ -41,15 +36,23 @@
         function processarImagem(item) {
             const link = (item.link || "").trim();
             const tipo = (item.tipo || "").toUpperCase();
+
+            // 1. SE FOR "NOTICIA" -> FORÇA MURAL.PNG
             if (tipo === "NOTICIA") return imgMuralPadrao;
 
+            // 2. SE FOR YOUTUBE -> PEGA MINIATURA
             const ytMatch = link.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
             if (ytMatch) return `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
 
+            // 3. SE FOR "IMAGEM" OU LINK DO DRIVE -> CONVERTE PARA MINIATURA DO GOOGLE
             if (tipo === "IMAGEM" || link.includes("drive.google.com")) {
                 const idMatch = link.match(/[-\w]{25,}/);
-                if (idMatch) return `https://drive.google.com/thumbnail?id=${idMatch[0]}&sz=w800`;
+                if (idMatch) {
+                    // Este link de thumbnail é mais confiável que o link de export
+                    return `https://drive.google.com/thumbnail?id=${idMatch[0]}&sz=w800`;
+                }
             }
+
             return imgMuralPadrao;
         }
 
@@ -58,38 +61,24 @@
                 const res = await fetch(url);
                 const dados = await res.json();
                 const container = document.getElementById(elementoId);
-                const agora = new Date().getTime();
                 
-                // REGRAS DE TEMPO: 24h para notícias, 7 dias para destaques
-                const limiteMs = isDestaque ? (7 * 24 * 60 * 60 * 1000) : (24 * 60 * 60 * 1000);
-
-                let dadosExibir = dados.filter(item => {
-                    if(!item.data) return false;
-                    const dataPost = new Date(item.data).getTime();
-                    return (agora - dataPost) <= limiteMs;
-                });
-
-                container.innerHTML = dadosExibir.reverse().slice(0, 15).map(item => {
+                container.innerHTML = dados.reverse().slice(0, 15).map(item => {
                     const imgFinal = processarImagem(item);
+                    const badgeCor = isDestaque ? 'tipo-destaque' : '';
                     const icone = isDestaque ? '✨' : '⌚';
-                    const nomeApresentador = item.apresentador || item.Apresentador || "";
-                    
-                    // Link ajustado para abrir vídeo do YouTube com controles e som
-                    let linkFinal = item.link || "#";
 
                     return `
-                        <a href="${linkFinal}" target="_blank" class="card">
+                        <a href="${item.link || '#'}" target="_blank" class="card">
                             <div class="thumb-container">
                                 <img src="${imgFinal}" class="thumb" onerror="this.src='${imgMuralPadrao}'">
                             </div>
                             <div class="corpo">
-                                <div class="apresentador">${nomeApresentador}</div>
-                                <span class="tipo">${icone} ${(item.tipo || 'Postagem')}</span>
+                                <span class="tipo ${badgeCor}">${icone} ${(item.tipo || 'Postagem')}</span>
                                 <div class="titulo">${item.titulo || item.mensagem || "Sem título"}</div>
                             </div>
                         </a>`;
                 }).join('');
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Erro no fetch:", e); }
         }
 
         carregarDados("https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec", "lista", false);
