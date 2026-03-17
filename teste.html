@@ -3,133 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laboratório de Testes - Rádio</title>
+    <title>Painel de Postagem - Rádio</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; color: #333; }
-        .container { max-width: 500px; margin: auto; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
-        h2 { color: #004a99; text-align: center; font-size: 18px; text-transform: uppercase; }
-        label { display: block; margin: 10px 0 5px; font-weight: bold; font-size: 14px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h2 { color: #004a99; margin-bottom: 20px; text-transform: uppercase; font-size: 18px; }
         
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; text-transform: uppercase; font-size: 14px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; text-align: left; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 14px; text-transform: uppercase; margin-bottom: 15px; transition: 0.3s; display: block; text-decoration: none; }
         .btn-24h { background: #004a99; }
         .btn-destaque { background: #b8860b; }
-
-        /* Estilo do Mural de Visualização */
-        .mural-teste { background: #fff; padding: 15px; border-radius: 15px; border: 2px dashed #ccc; }
-        .item-post { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; gap: 10px; align-items: center; }
-        .thumb { width: 60px; height: 60px; border-radius: 5px; object-fit: cover; background: #eee; }
-        .titulo-post { font-size: 14px; font-weight: bold; margin: 0; }
-        .tipo-tag { font-size: 10px; background: #e0e0e0; padding: 2px 5px; border-radius: 4px; font-weight: bold; }
+        .btn:hover { opacity: 0.8; transform: scale(1.02); }
+        
+        #status { font-weight: bold; margin-top: 10px; padding: 10px; border-radius: 5px; display: none; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="card">
-        <h2>🚀 Painel de Postagem</h2>
-        
-        <label>Link (YouTube / Redes Sociais)</label>
-        <input type="text" id="link" placeholder="Cole o link aqui...">
-        
-        <label>Título</label>
-        <input type="text" id="titulo" placeholder="Digite o título...">
-        
-        <label>Tipo</label>
-        <select id="tipo">
-            <option value="NOTÍCIA">NOTÍCIA</option>
-            <option value="VÍDEO">VÍDEO</option>
-        </select>
+<div class="card">
+    <h2>Postar no Mural 24h</h2>
+    
+    <label>Link (YouTube / Rede Social)</label>
+    <input type="text" id="link" placeholder="Cole o link aqui...">
 
-        <button class="btn btn-24h" onclick="enviar('24h')">Postar no Mural 24h</button>
-        <button class="btn btn-destaque" onclick="abrirForm()">📁 Abrir Form. Destaques</button>
-        
-        <p id="status" style="text-align:center; font-weight:bold; display:none; margin-top:15px;"></p>
-    </div>
+    <label>Título</label>
+    <input type="text" id="titulo" placeholder="Digite o título...">
 
-    <div class="mural-teste">
-        <h3 style="text-align:center; font-size: 14px; margin-top:0;">👀 Visualização (Últimos Destaques)</h3>
-        <div id="lista-destaques">Carregando visualização...</div>
-        <button onclick="carregarVisualizacao()" style="width:100%; margin-top:10px; cursor:pointer; padding: 8px; border-radius: 5px; border: 1px solid #ccc; background: #f9f9f9;">🔄 Atualizar Mural</button>
-    </div>
+    <label>Tipo</label>
+    <select id="tipo">
+        <option value="NOTÍCIA">NOTÍCIA</option>
+        <option value="VÍDEO">VÍDEO</option>
+    </select>
+
+    <button class="btn btn-24h" onclick="enviar24h()">🚀 Publicar Agora (24h)</button>
+    <div id="status"></div>
+
+    <hr>
+
+    <h2>Postar nos Destaques</h2>
+    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Para Destaques, é necessário fazer o <b>Upload</b> do arquivo:</p>
+    
+    <a href="https://forms.gle/CprGUbdaarpTcwKBA" target="_blank" class="btn btn-destaque">📁 Abrir Formulário de Upload</a>
 </div>
 
 <script>
-    // --- LINKS (Lembre-se de colocar seus links reais aqui) ---
-    const SCRIPT_24H = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec"; 
-    const SCRIPT_DESTAQUES = "https://script.google.com/macros/s/AKfycbwY0_wrO28yeXPNqNF0PbAxswS1o6WkOaZzbOjnIJhK0uJAe2aKpbTcYVLoaU8VD9tGBw/exec";
-    const FORM_DESTAQUES = "https://forms.gle/CprGUbdaarpTcwKBA";
+    // Link da sua planilha que já está funcionando (Sistema da Rádio)
+    const URL_SISTEMA_RADIO = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec"; 
 
-    async function enviar(destino) {
+    async function enviar24h() {
         const link = document.getElementById('link').value.trim();
         const titulo = document.getElementById('titulo').value.trim();
         const tipo = document.getElementById('tipo').value;
         const status = document.getElementById('status');
 
-        if(!link || !titulo) return alert("Preencha o link e o título!");
+        if(!link || !titulo) {
+            alert("Preencha o link e o título para o Mural 24h!");
+            return;
+        }
 
         status.style.display = "block";
+        status.style.background = "#fff3cd";
         status.style.color = "#856404";
-        status.innerText = "Enviando para o Mural...";
-        
+        status.innerText = "Enviando...";
+
         try {
-            await fetch(SCRIPT_24H, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: JSON.stringify({link, titulo, tipo}) 
+            await fetch(URL_SISTEMA_RADIO, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    link: link,
+                    titulo: titulo,
+                    tipo: tipo
+                })
             });
-            status.style.color = "green";
-            status.innerText = "✅ Postado com sucesso no Mural!";
+
+            status.style.background = "#d4edda";
+            status.style.color = "#155724";
+            status.innerText = "✅ Postado no Mural 24h!";
+            
             document.getElementById('link').value = "";
             document.getElementById('titulo').value = "";
-        } catch(e) { 
-            status.style.color = "red";
-            status.innerText = "❌ Erro ao postar."; 
+        } catch (e) {
+            status.style.background = "#f8d7da";
+            status.style.color = "#721c24";
+            status.innerText = "❌ Erro ao enviar.";
         }
     }
-
-    function abrirForm() { 
-        if(FORM_DESTAQUES.includes("http")) {
-            window.open(FORM_DESTAQUES, '_blank');
-        } else {
-            alert("Configure o link do formulário no código!");
-        }
-    }
-
-    async function carregarVisualizacao() {
-        const lista = document.getElementById('lista-destaques');
-        try {
-            // Adicionamos o ?aba=Destaques para ler a planilha nova
-            const res = await fetch(SCRIPT_DESTAQUES + "?aba=Destaques");
-            const texto = await res.text();
-            const dados = JSON.parse(texto);
-            lista.innerHTML = "";
-
-            if(dados.length === 0) {
-                lista.innerHTML = "Nenhum destaque encontrado.";
-                return;
-            }
-
-            // Mostra os 5 últimos itens postados
-            dados.slice(0, 5).forEach(item => {
-                const html = `
-                    <div class="item-post">
-                        <img src="${item.link}" class="thumb" onerror="this.src='https://via.placeholder.com/60?text=IMG'">
-                        <div>
-                            <p class="titulo-post">${item.titulo}</p>
-                            <span class="tipo-tag">${item.tipo}</span>
-                        </div>
-                    </div>`;
-                lista.innerHTML += html;
-            });
-        } catch(e) { 
-            lista.innerHTML = "Aguardando novos dados..."; 
-        }
-    }
-
-    // Carrega a lista automaticamente ao abrir a página
-    carregarVisualizacao();
 </script>
 
 </body>
