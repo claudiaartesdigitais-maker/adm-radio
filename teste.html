@@ -5,87 +5,105 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Mestre - Rádio</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
         .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
-        h2 { color: #004a99; text-align: center; margin-bottom: 20px; text-transform: uppercase; font-size: 18px; }
+        h2 { color: #004a99; text-align: center; margin-bottom: 5px; text-transform: uppercase; font-size: 18px; }
         .instrucao { font-size: 13px; color: #666; margin-bottom: 20px; text-align: center; line-height: 1.4; }
         
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; font-size: 14px; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: #fff; }
         
-        .botoes-container { display: flex; flex-direction: column; gap: 15px; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.3s; text-transform: uppercase; }
+        .botoes-container { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.3s; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 10px; }
         
         .btn-24h { background: #004a99; } /* Azul para Mural */
-        .btn-destaque { background: #b8860b; } /* Dourado para Destaques */
+        .btn-destaque { background: #b8860b; } /* Dourado para Destaques (Upload) */
         
-        .btn:hover { opacity: 0.9; transform: scale(1.02); }
-        #mensagem { text-align: center; font-weight: bold; padding: 10px; display: none; margin-top: 15px; border-radius: 5px; }
-        
-        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn:active { transform: translateY(0); }
+
+        #mensagem { text-align: center; font-weight: bold; padding: 12px; display: none; margin-top: 15px; border-radius: 8px; font-size: 14px; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 25px 0; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Central de Publicidade</h2>
-    <p class="instrucao">Escolha abaixo onde deseja publicar o conteúdo da rádio.</p>
+    <h2>Central de Publicações</h2>
+    <p class="instrucao">Preencha os dados e escolha o destino abaixo.</p>
     
     <label>Link (YouTube / Redes Sociais)</label>
     <input type="text" id="link" placeholder="Cole o link aqui...">
 
-    <label>Título da Notícia</label>
-    <input type="text" id="titulo" placeholder="Digite o título...">
+    <label>Título da Postagem</label>
+    <input type="text" id="titulo" placeholder="Ex: Promoção de Verão">
 
-    <button id="btn24h" class="btn btn-24h" onclick="enviar24h()">🚀 Postar no Mural 24h</button>
+    <label>Tipo de Conteúdo</label>
+    <select id="tipo">
+        <option value="NOTICIA">📰 NOTÍCIA / IMAGEM</option>
+        <option value="VIDEO">▶ VÍDEO / YOUTUBE</option>
+    </select>
 
-    <hr>
-
-    <label>Tem imagem ou vídeo próprio?</label>
-    <button class="btn btn-destaque" onclick="abrirFormulario()">📁 Fazer Upload / Destaques</button>
+    <div class="botoes-container">
+        <button id="btn24h" class="btn btn-24h" onclick="enviar24h()">🚀 Postar no Mural 24h</button>
+        
+        <hr style="margin: 10px 0;">
+        
+        <label style="text-align: center; width: 100%;">Possui arquivo para upload?</label>
+        <button class="btn btn-destaque" onclick="abrirFormulario()">📁 Abrir Form. Destaques</button>
+    </div>
 
     <div id="mensagem"></div>
 </div>
 
 <script>
-    // --- CONFIGURAÇÃO ---
+    // --- INSIRA SEUS LINKS AQUI ---
     const LINK_SCRIPT_24H = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec"; 
-    const LINK_DO_SEU_FORMULARIO = "https://script.google.com/macros/s/AKfycbwY0_wrO28yeXPNqNF0PbAxswS1o6WkOaZzbOjnIJhK0uJAe2aKpbTcYVLoaU8VD9tGBw/exec";
+    const LINK_DO_FORM_DESTAQUES = "https://script.google.com/macros/s/AKfycbwY0_wrO28yeXPNqNF0PbAxswS1o6WkOaZzbOjnIJhK0uJAe2aKpbTcYVLoaU8VD9tGBw/exec";
 
-    // Função para postar no Mural 24h (Onde cola o link)
     async function enviar24h() {
-        const link = document.getElementById('link').value;
-        const titulo = document.getElementById('titulo').value;
+        const link = document.getElementById('link').value.trim();
+        const titulo = document.getElementById('titulo').value.trim();
+        const tipo = document.getElementById('tipo').value;
         const msg = document.getElementById('mensagem');
 
         if(!link || !titulo) {
-            alert("Para o Mural 24h, você precisa colar o link e digitar o título!");
+            alert("Por favor, preencha o link e o título antes de postar no Mural!");
             return;
         }
 
         msg.style.display = "block";
         msg.style.background = "#fff3cd";
-        msg.innerText = "Postando no Mural...";
+        msg.style.color = "#856404";
+        msg.innerText = "Processando postagem...";
 
         try {
             await fetch(LINK_SCRIPT_24H, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: JSON.stringify({ link: link, titulo: titulo, tipo: "NOTICIA" })
+                body: JSON.stringify({ link: link, titulo: titulo, tipo: tipo })
             });
+            
             msg.style.background = "#d4edda";
-            msg.innerText = "✅ Postado no Mural 24h!";
+            msg.style.color = "#155724";
+            msg.innerText = "✅ Sucesso! Postado no Mural 24h.";
+            
+            // Limpa os campos após o sucesso
             document.getElementById('link').value = "";
             document.getElementById('titulo').value = "";
         } catch (e) {
             msg.style.background = "#f8d7da";
-            msg.innerText = "❌ Erro ao postar.";
+            msg.style.color = "#721c24";
+            msg.innerText = "❌ Erro ao conectar com a planilha.";
         }
     }
 
-    // Função para abrir o formulário (Onde faz upload)
     function abrirFormulario() {
-        window.open(LINK_DO_SEU_FORMULARIO, '_blank');
+        if(LINK_DO_FORM_DESTAQUES.includes("http")) {
+            window.open(LINK_DO_FORM_DESTAQUES, '_blank');
+        } else {
+            alert("Por favor, configure o link do formulário no código.");
+        }
     }
 </script>
 
