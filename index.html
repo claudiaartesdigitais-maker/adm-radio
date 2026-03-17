@@ -3,130 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
-        body, html { margin: 0; padding: 0; background: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; min-height: 100vh; overflow-x: hidden; }
+        body, html { margin: 0; padding: 0; background: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; overflow: hidden; height: 480px; }
         .mural-titulo { padding: 15px 18px 8px 18px; font-size: 22px; font-weight: 900; color: #001a33; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
         .mural-titulo::before { content: ''; width: 5px; height: 22px; background: #d32f2f; border-radius: 2px; }
-        
-        /* Estilo Notícias 24h */
         .feed-container { display: flex; flex-direction: row; overflow-x: auto; padding: 10px 15px 35px 15px; gap: 18px; -webkit-overflow-scrolling: touch; }
         .feed-container::-webkit-scrollbar { display: none; }
-        .card { flex: 0 0 300px; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.12); text-decoration: none; color: #333; height: 400px; display: flex; flex-direction: column; border: 1px solid #eee; overflow: hidden; position: relative; }
-        
-        /* Estilo Carrossel Destaques */
-        .swiper { width: 100%; padding: 10px 15px 50px 15px; }
-        .swiper-slide { width: 300px !important; background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; box-shadow: 0 8px 20px rgba(0,0,0,0.12); height: 400px; display: flex; flex-direction: column; position: relative; }
-        
-        .thumb-container { width: 100%; height: 200px; background: #000; overflow: hidden; position: relative; }
+        .card { flex: 0 0 300px; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.12); text-decoration: none; color: #333; height: 400px; display: flex; flex-direction: column; border: 1px solid #eee; overflow: hidden; }
+        .thumb-container { width: 100%; height: 200px; background: #000; overflow: hidden; }
         .thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
         .corpo { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: flex-start; }
-        .tipo-tag { font-size: 12px; color: #d32f2f; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; }
-        .titulo-card { font-size: 18px; font-weight: bold; line-height: 1.4; color: #001a33; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
-        .btn-curtir { position: absolute; bottom: 15px; right: 15px; background: rgba(255,255,255,0.95); border: none; border-radius: 20px; padding: 6px 15px; font-weight: bold; color: #d32f2f; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px; z-index: 10; }
+        .tipo { font-size: 12px; color: #d32f2f; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; }
+        .titulo { font-size: 18px; font-weight: bold; line-height: 1.4; color: #001a33; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
     </style>
 </head>
 <body>
-
     <div class="mural-titulo">Notícias 24 horas</div>
-    <div id="lista-noticias" class="feed-container"></div>
+    <div id="lista" class="feed-container"></div>
 
-    <hr style="border: 0; border-top: 1px solid #f0f0f0; margin: 10px 0;">
-
-    <div class="mural-titulo">Destaques da Rádio</div>
-    <div class="swiper mySwiper">
-        <div class="swiper-wrapper" id="container-destaques"></div>
-        <div class="swiper-pagination"></div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    
     <script>
-        // CONFIGURAÇÕES
-        const SCRIPT_24H = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec";
-        const SCRIPT_DESTAQUES = "https://script.google.com/macros/s/AKfycbxEImV41WxE3FxzcY-_-zFkzST8czcXBXixrnnxEPBaizDBqc6OPYa2f0ttx4WCYUJHNw/exec";
-        const IMG_PADRAO = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
+        async function carregar() {
+            const url = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec";
+            const imgMuralPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png?t=" + new Date().getTime();
 
-        // FUNÇÃO 1: CARREGAR NOTÍCIAS 24H (Mantendo sua lógica de capas sociais)
-        async function carregarNoticias() {
             try {
-                const res = await fetch(SCRIPT_24H);
-                const dados = await res.json();
-                const container = document.getElementById('lista-noticias');
+                const res = await fetch(url);
+                const dados = await res.json(); 
+                const container = document.getElementById('lista');
                 const agora = new Date().getTime();
 
                 const filtradas = dados.filter(item => {
                     if(!item.data) return false;
                     return (agora - new Date(item.data).getTime()) < 86400000;
                 });
-
+                
                 if (filtradas.length === 0) {
-                    container.innerHTML = "<p style='padding:50px; color:#999; text-align:center; width:100%;'>Sem novidades recentes.</p>";
+                    container.innerHTML = "<p style='padding:50px; color:#999; text-align:center; width:100%; font-size:16px;'>Sem novidades nas últimas 24h.</p>";
                     return;
                 }
 
                 container.innerHTML = filtradas.reverse().map(item => {
-                    const link = (item.link || "").trim();
-                    const ytMatch = link.match(/(?:youtu\.be\/|watch\?v=)([^#\&\?]*).*/);
-                    let capa = item.capa || IMG_PADRAO;
+                    const linkOriginal = (item.link || "").trim();
+                    const linkLower = linkOriginal.toLowerCase();
+                    const ytMatch = linkOriginal.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
+                    const ytId = ytMatch ? ytMatch[1] : null;
                     
-                    if (link.includes("facebook") || link.includes("instagram") || link.includes("tiktok")) {
-                        capa = IMG_PADRAO;
-                    } else if (ytMatch) {
-                        capa = `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
+                    let imgFinal;
+                    
+                    // 1. Checa se é REDE SOCIAL (Facebook, Instagram, Kwai, TikTok) -> PRIORIDADE MURAL
+                    if (
+                        linkLower.includes("facebook") || 
+                        linkLower.includes("fb.watch") || 
+                        linkLower.includes("fb.com") || 
+                        linkLower.includes("instagram") || 
+                        linkLower.includes("tiktok") || 
+                        linkLower.includes("kwai")
+                    ) {
+                        imgFinal = imgMuralPadrao;
+                    } 
+                    // 2. Se for YouTube Puro (fora de rede social) -> Puxa capa do YT
+                    else if (ytId) {
+                        imgFinal = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+                    } 
+                    // 3. Se tiver capa personalizada na planilha -> Usa a capa
+                    else if (item.capa && item.capa.trim().length > 15 && item.capa.startsWith('http')) {
+                        imgFinal = item.capa;
+                    } 
+                    // 4. Fallback final -> Usa o Mural
+                    else {
+                        imgFinal = imgMuralPadrao;
                     }
-
+                    
                     return `
-                        <a href="${link}" target="_blank" class="card">
-                            <div class="thumb-container"><img src="${capa}" class="thumb" onerror="this.src='${IMG_PADRAO}'"></div>
+                        <a href="${linkOriginal}" target="_blank" class="card">
+                            <div class="thumb-container">
+                                <img src="${imgFinal}" class="thumb" onerror="this.src='${imgMuralPadrao}'">
+                            </div>
                             <div class="corpo">
-                                <span class="tipo-tag">⌚ ${(item.tipo || 'NOTÍCIA')}</span>
-                                <div class="titulo-card">${item.titulo}</div>
+                                <span class="tipo">⌚ ${(item.tipo || 'Destaque')}</span>
+                                <div class="titulo">${item.titulo}</div>
                             </div>
                         </a>`;
                 }).join('');
-            } catch (e) { console.error("Erro 24h:", e); }
+            } catch (e) { console.error(e); }
         }
-
-        // FUNÇÃO 2: CARREGAR DESTAQUES (Lógica para fotos reais do Drive)
-        async function carregarDestaques() {
-            try {
-                const res = await fetch(SCRIPT_DESTAQUES);
-                const dados = await res.json();
-                const container = document.getElementById('container-destaques');
-
-                if (!dados || dados.length === 0) {
-                    container.innerHTML = "<p style='padding:50px; color:#999; text-align:center; width:100%;'>Em breve novos destaques.</p>";
-                    return;
-                }
-
-                container.innerHTML = dados.map(item => {
-                    const midia = (item.link || "").trim();
-                    const ehVideo = item.tipo === "VIDEO";
-
-                    return `
-                        <div class="swiper-slide">
-                            <div class="thumb-container">
-                                ${ehVideo 
-                                    ? `<video src="${midia}" class="thumb" muted loop onclick="this.play()"></video>`
-                                    : `<img src="${midia}" class="thumb" onerror="this.src='${IMG_PADRAO}'">`
-                                }
-                            </div>
-                            <div class="corpo">
-                                <span class="tipo-tag">✨ DESTAQUE</span>
-                                <div class="titulo-card">${item.titulo || ''}</div>
-                            </div>
-                            <button class="btn-curtir">❤️ <span>${item.curtidas || 0}</span></button>
-                        </div>`;
-                }).join('');
-
-                new Swiper(".mySwiper", { slidesPerView: "auto", spaceBetween: 18, pagination: { el: ".swiper-pagination", clickable: true } });
-            } catch (e) { console.error("Erro Destaques:", e); }
-        }
-
-        // Inicia as duas funções
-        carregarNoticias();
-        carregarDestaques();
-    </script>
-</body>
-</html>
