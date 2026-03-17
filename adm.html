@@ -17,16 +17,16 @@
             transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .btn-destaques { background: linear-gradient(135deg, #004a99, #003366); }
-        .btn-redes { background: linear-gradient(135deg, #d32f2f, #b71c1c); }
+        /* Os dois botões em Azul como você pediu */
+        .btn-azul { background: linear-gradient(135deg, #004a99, #003366); }
         
         .btn-portal:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
 
-        /* Estilo do Card do Formulário (Inicia escondido) */
+        /* Estilo do Card do Formulário (Notícias 24h) */
         .card { 
             background: white; padding: 20px; border-radius: 15px; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; 
-            max-width: 400px; display: none; /* Esconde o formulário inicialmente */
+            max-width: 400px; display: none; 
         }
 
         h2 { color: #004a99; text-align: center; margin-bottom: 20px; font-size: 1.2rem; }
@@ -42,19 +42,19 @@
 <body>
 
     <div class="menu-container" id="menuPrincipal">
-        <h2 style="color: #333;">O que deseja fazer?</h2>
+        <h2 style="color: #333; text-align: center;">Painel de Controle</h2>
         
-        <button class="btn-portal btn-destaques" onclick="abrirFormulario()">
-            <span>✨</span> Publicar nos Destaques
+        <button class="btn-portal btn-azul" onclick="abrirFormulario()">
+            <span>🎬</span> Postar em Notícias 24h
         </button>
 
-        <a href="https://www.youtube.com" target="_blank" class="btn-portal btn-redes">
-            <span>🎬</span> Publicar YouTube / Redes
+        <a href="https://forms.gle/s2XSQwjrRLx5nS8LA" target="_blank" class="btn-portal btn-azul">
+            <span>✨</span> Postar em Destaques
         </a>
     </div>
 
     <div class="card" id="cardFormulario">
-        <h2>✨ Publicar no Mural</h2>
+        <h2>🎬 Postar Notícias 24h</h2>
         
         <label>Link da Notícia/Vídeo</label>
         <input type="text" id="link" placeholder="Cole o link aqui...">
@@ -75,7 +75,6 @@
     </div>
 
 <script>
-    // Funções para alternar entre Menu e Formulário
     function abrirFormulario() {
         document.getElementById('menuPrincipal').style.display = 'none';
         document.getElementById('cardFormulario').style.display = 'block';
@@ -86,11 +85,10 @@
         document.getElementById('cardFormulario').style.display = 'none';
     }
 
-    // Sua função original de enviar dados
     async function enviarDados() {
         const btn = document.getElementById('btnEnviar');
         const msg = document.getElementById('mensagem');
-        // Mantive o seu link do Script abaixo
+        // Este é o link do Script das NOTÍCIAS 24H que estava no seu código original
         const urlScript = "https://script.google.com/macros/s/AKfycbyhQWzOQlxZwCyM1SA1vlcUorGVw4H2Sk1J2dNs977SKVIYTV6EyPQfpznDt75oEPg/exec"; 
 
         const payload = {
@@ -108,15 +106,16 @@
         btn.innerText = "Enviando...";
 
         try {
+            // Usando o método que funcionava no seu código antigo
             await fetch(urlScript, {
                 method: 'POST',
-                mode: 'no-cors', // Adicionado para evitar erro de redirecionamento no POST
+                mode: 'no-cors',
                 body: JSON.stringify(payload)
             });
             
             msg.style.display = "block";
             msg.style.color = "green";
-            msg.innerText = "Sucesso! Publicado no Mural.";
+            msg.innerText = "Sucesso! Publicado no Notícias 24h.";
             
             document.getElementById('link').value = "";
             document.getElementById('titulo').value = "";
