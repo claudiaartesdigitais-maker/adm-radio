@@ -5,84 +5,171 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         body, html { margin: 0; padding: 0; background: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; }
-        .mural-titulo { padding: 15px 18px 8px 18px; font-size: 22px; font-weight: 900; color: #001a33; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
-        .mural-titulo::before { content: ''; width: 5px; height: 22px; background: #d32f2f; border-radius: 2px; }
-        .titulo-destaque::before { background: #b8860b; }
-        .titulo-destaque { color: #b8860b; }
-        .feed-container { display: flex; flex-direction: row; overflow-x: auto; padding: 10px 15px 35px 15px; gap: 18px; -webkit-overflow-scrolling: touch; }
+        
+        /* TÍTULO ESTILO 'NOTÍCIAS 24 HORAS' (Preto com risco vermelho) */
+        .mural-titulo { 
+            padding: 20px 20px 10px 20px; 
+            font-size: 24px; 
+            font-weight: 800; 
+            color: #000000; /* Preto */
+            text-transform: uppercase; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            letter-spacing: 1px;
+        }
+        .mural-titulo::before { 
+            content: ''; 
+            width: 6px; 
+            height: 26px; 
+            background: #d32f2f; /* Vermelho */
+            border-radius: 3px; 
+        }
+
+        .feed-container { 
+            display: flex; 
+            flex-direction: row; 
+            overflow-x: auto; 
+            padding: 10px 20px 40px 20px; 
+            gap: 25px; 
+            -webkit-overflow-scrolling: touch; 
+        }
         .feed-container::-webkit-scrollbar { display: none; }
-        .card { flex: 0 0 300px; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.12); text-decoration: none; color: #333; height: 400px; display: flex; flex-direction: column; border: 1px solid #eee; overflow: hidden; }
-        .thumb-container { width: 100%; height: 200px; background: #000; overflow: hidden; }
-        .thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .corpo { padding: 15px; flex: 1; display: flex; flex-direction: column; }
-        .tipo { font-size: 12px; color: #d32f2f; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; }
-        .tipo-destaque { color: #b8860b; }
-        .titulo { font-size: 18px; font-weight: bold; line-height: 1.4; color: #001a33; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        .card { 
+            flex: 0 0 400px; 
+            background: white; 
+            border-radius: 24px; 
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15); 
+            color: #333; 
+            display: flex; 
+            flex-direction: column; 
+            border: 1px solid #eee; 
+            overflow: hidden; 
+            position: relative;
+            min-height: 540px; 
+        }
+        
+        .thumb-container { width: 100%; height: 300px; background: #000; overflow: hidden; position: relative; }
+        .thumb { width: 100%; height: 100%; object-fit: cover; display: block; border: none; }
+        
+        .corpo { padding: 15px 20px 25px 20px; flex: 1; display: flex; flex-direction: column; }
+        
+        /* BOTÃO CLIQUE E SAIBA MAIS (AZUL CLARO DA IMAGEM) */
+        .btn-saiba-mais { 
+            background: #0056e3; /* Azul Claro */
+            color: #ffffff; 
+            text-align: center; 
+            padding: 9px 18px; 
+            border-radius: 8px; 
+            font-size: 13px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 12px;
+            width: fit-content;
+            letter-spacing: 0.5px;
+        }
+        
+        .titulo { 
+            font-size: 16px; 
+            font-weight: 700; 
+            line-height: 1.4; 
+            color: #111; 
+            margin-bottom: 6px;
+            display: -webkit-box; 
+            -webkit-line-clamp: 3; 
+            -webkit-box-orient: vertical; 
+            overflow: hidden;
+        }
+
+        /* NOME DO APRESENTADOR (Cinza) */
+        .apresentador {
+            font-size: 13px;
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-transform: none;
+        }
+
+        .play-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 86, 227, 0.85); /* Azul claro no play também */ color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; z-index: 5; pointer-events: none; }
+
+        .like-container { display: flex; align-items: center; gap: 8px; margin-bottom: 15px; cursor: pointer; width: fit-content; z-index: 10; }
+        .like-btn { font-size: 1.5rem; color: #ccc; transition: 0.2s; }
+        .like-btn.active { color: #d32f2f; transform: scale(1.1); }
+        .like-count { font-size: 14px; color: #444; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="mural-titulo">Notícias 24 horas</div>
-    <div id="lista" class="feed-container"></div>
-
-    <hr style="border:0; border-top:1px solid #eee; margin: 10px 0;">
-
-    <div class="mural-titulo titulo-destaque">Destaques da Semana</div>
+    <div class="mural-titulo">Destaques da Semana</div>
     <div id="lista-destaques" class="feed-container"></div>
 
     <script>
         const imgMuralPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
 
-        function processarImagem(item) {
-            const link = (item.link || "").trim();
-            const tipo = (item.tipo || "").toUpperCase();
-
-            // 1. SE FOR "NOTICIA" -> FORÇA MURAL.PNG
-            if (tipo === "NOTICIA") return imgMuralPadrao;
-
-            // 2. SE FOR YOUTUBE -> PEGA MINIATURA
-            const ytMatch = link.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
-            if (ytMatch) return `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
-
-            // 3. SE FOR "IMAGEM" OU LINK DO DRIVE -> CONVERTE PARA MINIATURA DO GOOGLE
-            if (tipo === "IMAGEM" || link.includes("drive.google.com")) {
-                const idMatch = link.match(/[-\w]{25,}/);
-                if (idMatch) {
-                    // Este link de thumbnail é mais confiável que o link de export
-                    return `https://drive.google.com/thumbnail?id=${idMatch[0]}&sz=w800`;
-                }
-            }
-
-            return imgMuralPadrao;
+        async function curtirDestaque(linha, btn) {
+            if(btn.classList.contains('active')) return;
+            btn.classList.add('active');
+            btn.innerText = "❤️";
+            const countElem = btn.nextElementSibling;
+            countElem.innerText = parseInt(countElem.innerText) + 1;
+            
+            fetch("https://script.google.com/macros/s/AKfycbxNzDvifH0pv74i5E7BUS-scdfujI7mRLymYcOmCJDN3JH4AeGAThfHZoGDt2xS228zWw/exec?aba=Respostas ao formulário 1", { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                body: JSON.stringify({ linha: linha }) 
+            });
         }
 
-        async function carregarDados(url, elementoId, isDestaque) {
+        function processarMidia(item) {
+            const link = (item.link || "").trim();
+            const tipo = (item.tipo || "").toUpperCase();
+            const idMatch = link.match(/[-\w]{25,}/);
+            const id = idMatch ? idMatch[0] : null;
+            
+            let html = "";
+            if (tipo === "VIDEO") html += `<div class="play-icon">🔊</div>`;
+            const imgUrl = id ? `https://drive.google.com/thumbnail?id=${id}&sz=w800` : imgMuralPadrao;
+            html += `<img src="${imgUrl}" class="thumb" onerror="this.src='${imgMuralPadrao}'">`;
+            return html;
+        }
+
+        async function carregarDestaques() {
+            const url = "https://script.google.com/macros/s/AKfycbwCiRjsSxFZYquAGqzMZvXLRcrNCy9groQajYJvgMOm-nrkDqYQrEjkxNVIPzK6ksQ8Uw/exec?aba=Respostas ao formulário 1";
+            
             try {
                 const res = await fetch(url);
                 const dados = await res.json();
-                const container = document.getElementById(elementoId);
+                const container = document.getElementById('lista-destaques');
                 
                 container.innerHTML = dados.reverse().slice(0, 15).map(item => {
-                    const imgFinal = processarImagem(item);
-                    const badgeCor = isDestaque ? 'tipo-destaque' : '';
-                    const icone = isDestaque ? '✨' : '⌚';
+                    const midiaHtml = processarMidia(item);
+                    const idRegistro = item.id || item.linha;
 
                     return `
-                        <a href="${item.link || '#'}" target="_blank" class="card">
-                            <div class="thumb-container">
-                                <img src="${imgFinal}" class="thumb" onerror="this.src='${imgMuralPadrao}'">
-                            </div>
+                        <div class="card">
+                            <a href="${item.link || '#'}" target="_blank" style="text-decoration:none; color:inherit;">
+                                <div class="thumb-container">${midiaHtml}</div>
+                            </a>
                             <div class="corpo">
-                                <span class="tipo ${badgeCor}">${icone} ${(item.tipo || 'Postagem')}</span>
-                                <div class="titulo">${item.titulo || item.mensagem || "Sem título"}</div>
+                                <div class="like-container" onclick="curtirDestaque(${idRegistro}, this.querySelector('.like-btn'))">
+                                    <span class="like-btn">🤍</span>
+                                    <span class="like-count">${item.curtidas || 0}</span>
+                                </div>
+                                <a href="${item.link || '#'}" target="_blank" class="btn-saiba-mais">Clique e saiba mais</a>
+                                <a href="${item.link || '#'}" target="_blank" style="text-decoration:none; color:inherit;">
+                                    <div class="titulo">${item.titulo || item.mensagem || "Sem título"}</div>
+                                    <div class="apresentador">Por: ${item.apresentador || "Rádio Cotia"}</div>
+                                </a>
                             </div>
-                        </a>`;
+                        </div>`;
                 }).join('');
-            } catch (e) { console.error("Erro no fetch:", e); }
+            } catch (e) { console.error("Erro:", e); }
         }
 
-        carregarDados("https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec", "lista", false);
-        carregarDados("https://script.google.com/macros/s/AKfycbxNzDvifH0pv74i5E7BUS-scdfujI7mRLymYcOmCJDN3JH4AeGAThfHZoGDt2xS228zWw/exec?aba=Respostas ao formulário 1", "lista-destaques", true);
+        carregarDestaques();
     </script>
 </body>
 </html>
