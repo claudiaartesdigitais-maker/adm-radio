@@ -3,83 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Rádio - Postar Notícia</title>
+    <title>Painel de Postagem - Rádio</title>
     <style>
         body { font-family: sans-serif; background: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        h2 { color: #004a99; text-align: center; margin-bottom: 20px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
-        input, select, button { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        button { background: #004a99; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #003366; }
-        #mensagem { text-align: center; font-weight: bold; padding: 10px; display: none; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h2 { color: #004a99; margin-bottom: 20px; text-transform: uppercase; font-size: 18px; }
+        
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; text-align: left; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 14px; text-transform: uppercase; margin-bottom: 15px; transition: 0.3s; display: block; text-decoration: none; box-sizing: border-box; }
+        .btn-24h { background: #004a99; }
+        .btn-destaque { background: #b8860b; }
+        .btn:hover { opacity: 0.8; transform: scale(1.02); }
+        
+        #status { font-weight: bold; margin-top: 10px; padding: 10px; border-radius: 5px; display: none; font-size: 14px; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 25px 0; }
+        p { font-size: 13px; color: #666; margin-bottom: 15px; line-height: 1.4; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Postar no Mural</h2>
+    <h2>Mural 24 Horas</h2>
     
-    <label>Link da Notícia/Vídeo</label>
+    <label>Link (YouTube / Rede Social)</label>
     <input type="text" id="link" placeholder="Cole o link aqui...">
 
-    <label>Título da Notícia</label>
+    <label>Título</label>
     <input type="text" id="titulo" placeholder="Digite o título...">
 
-    <label>Tipo de Conteúdo</label>
+    <label>Tipo</label>
     <select id="tipo">
-        <option value="NOTICIA">📰 NOTÍCIA</option>
-        <option value="VIDEO">▶ VÍDEO</option>
+        <option value="NOTÍCIA">NOTÍCIA</option>
+        <option value="VÍDEO">VÍDEO</option>
     </select>
 
-    <button id="btnEnviar" onclick="enviarDados()">PUBLICAR AGORA</button>
-    <div id="mensagem"></div>
+    <button class="btn btn-24h" onclick="enviar24h()">🚀 Publicar no Mural</button>
+    <div id="status"></div>
+
+    <hr>
+
+    <h2>Destaques</h2>
+    <p>Para postar nos <b>Destaques</b>, clique no botão abaixo para abrir o formulário de upload de arquivos:</p>
+    
+    <a href="https://forms.gle/CprGUbdaarpTcwKBA" target="_blank" class="btn btn-destaque">📁 Abrir Formulário de Upload</a>
 </div>
 
 <script>
-    async function enviarDados() {
-        const btn = document.getElementById('btnEnviar');
-        const msg = document.getElementById('mensagem');
-        // Seu link do Apps Script mantido:
-        const urlScript = "https://script.google.com/macros/s/AKfycbyhQWzOQlxZwCyM1SA1vlcUorGVw4H2Sk1J2dNs977SKVIYTV6EyPQfpznDt75oEPg/exec"; 
+    // Link do seu Script da Planilha "Sistema da Rádio" (A que já funciona)
+    const URL_SISTEMA_RADIO = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec"; 
 
-        const payload = {
-            link: document.getElementById('link').value,
-            titulo: document.getElementById('titulo').value,
-            tipo: document.getElementById('tipo').value
-        };
+    async function enviar24h() {
+        const link = document.getElementById('link').value.trim();
+        const titulo = document.getElementById('titulo').value.trim();
+        const tipo = document.getElementById('tipo').value;
+        const status = document.getElementById('status');
 
-        if(!payload.link || !payload.titulo) {
-            alert("Preencha todos os campos!");
+        if(!link || !titulo) {
+            alert("Por favor, preencha o link e o título!");
             return;
         }
 
-        btn.disabled = true;
-        btn.innerText = "Enviando...";
-        msg.style.display = "none"; // Esconde mensagem anterior se houver
+        status.style.display = "block";
+        status.style.background = "#fff3cd";
+        status.style.color = "#856404";
+        status.innerText = "Enviando postagem...";
 
         try {
-            await fetch(urlScript, {
+            await fetch(URL_SISTEMA_RADIO, {
                 method: 'POST',
-                mode: 'no-cors', // Adicionado para evitar erro de CORS no Apps Script
-                body: JSON.stringify(payload)
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    link: link,
+                    titulo: titulo,
+                    tipo: tipo
+                })
             });
+
+            status.style.background = "#d4edda";
+            status.style.color = "#155724";
+            status.innerText = "✅ Sucesso! Postado no Mural 24h.";
             
-            msg.style.display = "block";
-            msg.style.color = "green";
-            msg.innerText = "Sucesso! Enviado para a planilha.";
-            
-            // Limpa os campos após o sucesso
+            // Limpa os campos
             document.getElementById('link').value = "";
             document.getElementById('titulo').value = "";
-        } catch (error) {
-            console.error(error);
-            msg.style.display = "block";
-            msg.style.color = "red";
-            msg.innerText = "Erro ao publicar. Tente novamente.";
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "PUBLICAR AGORA";
+            
+            // Esconde a mensagem de sucesso após 3 segundos
+            setTimeout(() => { status.style.display = "none"; }, 3000);
+
+        } catch (e) {
+            status.style.background = "#f8d7da";
+            status.style.color = "#721c24";
+            status.innerText = "❌ Erro ao enviar. Tente novamente.";
         }
     }
 </script>
