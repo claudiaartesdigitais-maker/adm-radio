@@ -3,66 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mural Rádio Cotia</title>
     <style>
         body, html { margin: 0; padding: 0; background: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; }
-        
-        .mural-titulo { 
-            padding: 20px 20px 10px 20px; 
-            font-size: 22px; 
-            font-weight: 800; 
-            color: #000; 
-            text-transform: uppercase; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-        }
+        .mural-titulo { padding: 20px 20px 10px 20px; font-size: 22px; font-weight: 800; color: #000; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
         .mural-titulo::before { content: ''; width: 5px; height: 24px; background: #d32f2f; border-radius: 2px; }
-
-        .feed-container { 
-            display: flex; 
-            flex-direction: row; 
-            overflow-x: auto; 
-            padding: 10px 20px 25px 20px; 
-            gap: 15px; 
-            -webkit-overflow-scrolling: touch; 
-            cursor: grab;
-        }
+        .feed-container { display: flex; flex-direction: row; overflow-x: auto; padding: 10px 20px 25px 20px; gap: 15px; -webkit-overflow-scrolling: touch; cursor: grab; }
         .feed-container::-webkit-scrollbar { display: none; }
-        .feed-container:active { cursor: grabbing; }
-
-        /* --- ESTILO 1: NOTÍCIAS 24H --- */
-        .card-24h { 
-            flex: 0 0 300px; 
-            background: white; 
-            border-radius: 16px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
-            text-decoration: none; 
-            color: #333; 
-            height: fit-content; 
-            display: flex; 
-            flex-direction: column; 
-            border: 1px solid #eee; 
-            overflow: hidden; 
-            padding-bottom: 15px;
-        }
+        
+        /* CARDS NOTÍCIAS 24H */
+        .card-24h { flex: 0 0 300px; background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); text-decoration: none; color: #333; display: flex; flex-direction: column; border: 1px solid #eee; overflow: hidden; padding-bottom: 15px; transition: transform 0.2s; }
+        .card-24h:active { transform: scale(0.98); }
         .thumb-24h { width: 100%; height: 165px; background: #000; overflow: hidden; }
         .thumb-24h img { width: 100%; height: 100%; object-fit: cover; }
         .corpo-24h { padding: 12px; display: flex; flex-direction: column; }
         .tipo-24h { font-size: 10px; color: #d32f2f; font-weight: 900; text-transform: uppercase; margin-bottom: 6px; display: block; }
         .titulo-24h { font-size: 16px; font-weight: bold; line-height: 1.3; color: #001a33; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* --- ESTILO 2: DESTAQUES --- */
-        .card-destaque { 
-            flex: 0 0 360px; 
-            background: white; 
-            border-radius: 24px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.12); 
-            display: flex; 
-            flex-direction: column; 
-            border: 1px solid #eee; 
-            overflow: hidden; 
-            min-height: 480px; 
-        }
+        /* CARDS DESTAQUES */
+        .card-destaque { flex: 0 0 360px; background: white; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.12); display: flex; flex-direction: column; border: 1px solid #eee; overflow: hidden; min-height: 480px; }
         .thumb-dest { width: 100%; height: 250px; background: #000; position: relative; overflow: hidden; }
         .thumb-dest img { width: 100%; height: 100%; object-fit: cover; }
         .play-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 86, 227, 0.8); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 2; }
@@ -79,18 +38,21 @@
 
     <div class="mural-titulo">Notícias 24 horas</div>
     <div id="lista-24h" class="feed-container"></div>
-
+    
     <hr style="border:0; border-top:1px solid #eee; margin: 10px 0;">
-
+    
     <div class="mural-titulo">Destaques da Semana</div>
     <div id="lista-destaques" class="feed-container"></div>
 
     <script>
-        const imgPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
+        // Imagem reserva caso tudo falhe
+        const imgPadrãoGlobal = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
         
-        // --- SEU NOVO LINK DE DESTAQUES ---
+        // Configuração dos links dos Scripts do Google
+        const URL_24H = "https://script.google.com/macros/s/AKfycbxt5y11TLRYaMeBoxAnFLuD7zbqIvupf2FPJcf1PgLsTlXnLxOLjh-8WfySE7rl2uyw/exec";
         const URL_DESTAQUES = "https://script.google.com/macros/s/AKfycbyO26T3v7fcWBuiFO4u1uWllKyK7nrQVTtBvOTMQpsqrH3PHtyECzSVYxsK7SAFfc-8NA/exec";
 
+        // Função para scroll lateral com o mouse
         function iniciarArraste(id) {
             const el = document.getElementById(id);
             let isDown = false, startX, scrollLeft;
@@ -101,12 +63,13 @@
         }
 
         async function carregar24h() {
-            const url24h = "https://script.google.com/macros/s/AKfycbz-ZM201t55jwfICQ6BSmGGT0mZUWClAXbFAKGhFopCcFJzKmGN_sxqV4UAPlCsSutM/exec";
             try {
-                const res = await fetch(url24h);
+                const res = await fetch(URL_24H);
                 const dados = await res.json();
                 const container = document.getElementById('lista-24h');
                 const agora = new Date().getTime();
+                
+                // Filtro para mostrar apenas o que foi postado nas últimas 24h
                 const filtradas = dados.filter(item => item.data && (agora - new Date(item.data).getTime()) < 86400000);
 
                 if(filtradas.length === 0) {
@@ -115,12 +78,39 @@
                 }
 
                 container.innerHTML = filtradas.map(item => {
-                    const link = (item.link || "").trim();
-                    const ytMatch = link.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
-                    const img = ytMatch ? `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg` : (item.capa || imgPadrao);
+                    const linkOriginal = (item.link || "").trim();
+                    const linkLower = linkOriginal.toLowerCase();
+                    const imagemDaF3 = item.capaPadraoF3 || imgPadrãoGlobal;
+                    
+                    let imgFinal = "";
+
+                    // REGRA 1: Se for Rede Social, usa obrigatoriamente a imagem da F3
+                    if (
+                        linkLower.includes("facebook.com") || 
+                        linkLower.includes("fb.watch") ||
+                        linkLower.includes("instagram.com") || 
+                        linkLower.includes("tiktok.com") || 
+                        linkLower.includes("kwai.com")
+                    ) {
+                        imgFinal = imagemDaF3;
+                    } 
+                    // REGRA 2: Se for YouTube, tenta pegar a miniatura do vídeo
+                    else if (linkLower.includes("youtube.com") || linkLower.includes("youtu.be")) {
+                        const ytMatch = linkOriginal.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
+                        imgFinal = (ytMatch && ytMatch[1].length >= 10) 
+                            ? `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg` 
+                            : imagemDaF3;
+                    }
+                    // REGRA 3: Se tiver capa na linha, usa ela. Se não, usa F3.
+                    else {
+                        imgFinal = item.capa || imagemDaF3;
+                    }
+                    
                     return `
-                        <a href="${link}" target="_blank" class="card-24h">
-                            <div class="thumb-24h"><img src="${img}" onerror="this.src='${imgPadrao}'"></div>
+                        <a href="${linkOriginal}" target="_blank" class="card-24h">
+                            <div class="thumb-24h">
+                                <img src="${imgFinal}" onerror="this.src='${imagemDaF3}'">
+                            </div>
                             <div class="corpo-24h">
                                 <span class="tipo-24h">⌚ ${(item.tipo || 'Notícia')}</span>
                                 <div class="titulo-24h">${item.titulo}</div>
@@ -128,7 +118,10 @@
                         </a>`;
                 }).join('');
                 iniciarArraste('lista-24h');
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error("Erro ao carregar 24h:", e);
+                document.getElementById('lista-24h').innerHTML = "<p style='padding:20px; color:red;'>Erro ao carregar notícias.</p>";
+            }
         }
 
         async function carregarDestaques() {
@@ -136,21 +129,22 @@
                 const res = await fetch(URL_DESTAQUES);
                 const dados = await res.json();
                 const container = document.getElementById('lista-destaques');
-
+                
                 container.innerHTML = dados.map(item => {
                     const link = (item.link || "").trim();
                     const driveId = link.match(/[-\w]{25,}/);
-                    const img = driveId ? `https://drive.google.com/thumbnail?id=${driveId[0]}&sz=w800` : imgPadrao;
-
+                    const img = driveId ? `https://drive.google.com/thumbnail?id=${driveId[0]}&sz=w800` : imgPadrãoGlobal;
+                    
                     return `
                         <div class="card-destaque">
                             <a href="${link}" target="_blank" class="thumb-dest">
                                 ${item.tipo?.toUpperCase() === "VIDEO" ? '<div class="play-icon">🔊</div>' : ''}
-                                <img src="${img}" onerror="this.src='${imgPadrao}'">
+                                <img src="${img}" onerror="this.src='${imgPadrãoGlobal}'">
                             </a>
                             <div class="corpo-dest">
                                 <div class="like-container" onclick="curtir(${item.linha}, this.querySelector('.like-btn'))">
-                                    <span class="like-btn">🤍</span> <span style="font-weight:bold; font-size:14px;">${item.curtidas || 0}</span>
+                                    <span class="like-btn">🤍</span> 
+                                    <span style="font-weight:bold; font-size:14px;">${item.curtidas || 0}</span>
                                 </div>
                                 <a href="${link}" target="_blank" class="btn-saiba">Saiba mais</a>
                                 <span class="apresentador">${item.apresentador || "Rádio Cotia"}</span>
@@ -159,26 +153,20 @@
                         </div>`;
                 }).join('');
                 iniciarArraste('lista-destaques');
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Erro ao carregar Destaques:", e); }
         }
 
+        // Função de curtidas para os Destaques
         async function curtir(linha, btn) {
             if(btn.classList.contains('active')) return;
-            
             btn.classList.add('active'); 
             btn.innerText = "❤️";
             const num = btn.nextElementSibling;
-            const valorAtual = parseInt(num.innerText) || 0;
-            num.innerText = valorAtual + 1;
-            
-            fetch(URL_DESTAQUES, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ linha: linha }) 
-            });
+            num.innerText = (parseInt(num.innerText) || 0) + 1;
+            fetch(URL_DESTAQUES, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ linha: linha }) });
         }
 
+        // Inicia as duas seções
         carregar24h();
         carregarDestaques();
     </script>
