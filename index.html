@@ -24,37 +24,47 @@
             display: flex; 
             flex-direction: row; 
             overflow-x: auto; 
-            padding: 10px 20px 30px 20px; 
-            gap: 20px; 
+            padding: 10px 20px 25px 20px; 
+            gap: 15px; 
             -webkit-overflow-scrolling: touch; 
             cursor: grab;
         }
         .feed-container::-webkit-scrollbar { display: none; }
         .feed-container:active { cursor: grabbing; }
 
-        /* --- ESTILO 1: NOTÍCIAS 24H (Cards menores, sem curtidas) --- */
+        /* --- ESTILO 1: NOTÍCIAS 24H (MAIS LARGO E SEM SOBRA BRANCA) --- */
         .card-24h { 
-            flex: 0 0 280px; 
+            flex: 0 0 300px; /* Aumentado para melhor visualização */
             background: white; 
-            border-radius: 18px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08); 
+            border-radius: 16px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
             text-decoration: none; 
             color: #333; 
-            height: 360px; 
+            height: fit-content; /* O card agora "morde" o texto, sem sobras */
             display: flex; 
             flex-direction: column; 
             border: 1px solid #eee; 
             overflow: hidden; 
+            padding-bottom: 15px;
         }
-        .thumb-24h { width: 100%; height: 180px; background: #000; overflow: hidden; }
+        .thumb-24h { width: 100%; height: 165px; background: #000; overflow: hidden; }
         .thumb-24h img { width: 100%; height: 100%; object-fit: cover; }
-        .corpo-24h { padding: 15px; flex: 1; }
-        .tipo-24h { font-size: 11px; color: #d32f2f; font-weight: 900; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        .titulo-24h { font-size: 16px; font-weight: bold; line-height: 1.3; color: #001a33; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+        .corpo-24h { padding: 12px; display: flex; flex-direction: column; }
+        .tipo-24h { font-size: 10px; color: #d32f2f; font-weight: 900; text-transform: uppercase; margin-bottom: 6px; display: block; }
+        .titulo-24h { 
+            font-size: 16px; 
+            font-weight: bold; 
+            line-height: 1.3; 
+            color: #001a33; 
+            display: -webkit-box; 
+            -webkit-line-clamp: 3; 
+            -webkit-box-orient: vertical; 
+            overflow: hidden; 
+        }
 
-        /* --- ESTILO 2: DESTAQUES (Cards maiores, com curtidas) --- */
+        /* --- ESTILO 2: DESTAQUES --- */
         .card-destaque { 
-            flex: 0 0 380px; 
+            flex: 0 0 360px; 
             background: white; 
             border-radius: 24px; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.12); 
@@ -62,9 +72,9 @@
             flex-direction: column; 
             border: 1px solid #eee; 
             overflow: hidden; 
-            min-height: 500px; 
+            min-height: 480px; 
         }
-        .thumb-dest { width: 100%; height: 260px; background: #000; position: relative; overflow: hidden; }
+        .thumb-dest { width: 100%; height: 250px; background: #000; position: relative; overflow: hidden; }
         .thumb-dest img { width: 100%; height: 100%; object-fit: cover; }
         .play-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 86, 227, 0.8); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 2; }
         .corpo-dest { padding: 20px; display: flex; flex-direction: column; }
@@ -78,20 +88,17 @@
 </head>
 <body>
 
-    <!-- MURAL 1: NOTÍCIAS 24H -->
     <div class="mural-titulo">Notícias 24 horas</div>
     <div id="lista-24h" class="feed-container"></div>
 
     <hr style="border:0; border-top:1px solid #eee; margin: 10px 0;">
 
-    <!-- MURAL 2: DESTAQUES -->
     <div class="mural-titulo">Destaques da Semana</div>
     <div id="lista-destaques" class="feed-container"></div>
 
     <script>
         const imgPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
 
-        // Função para tornar os murais "arrastáveis"
         function iniciarArraste(id) {
             const el = document.getElementById(id);
             let isDown = false, startX, scrollLeft;
@@ -101,7 +108,6 @@
             el.addEventListener('mousemove', (e) => { if(!isDown) return; e.preventDefault(); const x = e.pageX - el.offsetLeft; const walk = (x - startX) * 2; el.scrollLeft = scrollLeft - walk; });
         }
 
-        // CARREGAR NOTÍCIAS 24H
         async function carregar24h() {
             const url = "https://script.google.com/macros/s/AKfycbz-ZM201t55jwfICQ6BSmGGT0mZUWClAXbFAKGhFopCcFJzKmGN_sxqV4UAPlCsSutM/exec";
             try {
@@ -135,7 +141,6 @@
             } catch (e) { console.error(e); }
         }
 
-        // CARREGAR DESTAQUES
         async function carregarDestaques() {
             const url = "https://script.google.com/macros/s/AKfycbxNzDvifH0pv74i5E7BUS-scdfujI7mRLymYcOmCJDN3JH4AeGAThfHZoGDt2xS228zWw/exec?aba=Respostas ao formulário 1";
             try {
