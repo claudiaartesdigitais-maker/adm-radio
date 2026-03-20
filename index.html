@@ -6,198 +6,177 @@
     <style>
         body, html { margin: 0; padding: 0; background: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; }
         
+        /* Títulos dos Murais */
         .mural-titulo { 
             padding: 20px 20px 10px 20px; 
-            font-size: 24px; 
+            font-size: 22px; 
             font-weight: 800; 
-            color: #000000; 
+            color: #000; 
             text-transform: uppercase; 
             display: flex; 
             align-items: center; 
-            gap: 12px; 
-            letter-spacing: 1px;
+            gap: 10px; 
         }
-        .mural-titulo::before { 
-            content: ''; width: 6px; height: 26px; background: #d32f2f; border-radius: 3px; 
-        }
+        .mural-titulo::before { content: ''; width: 5px; height: 24px; background: #d32f2f; border-radius: 2px; }
 
+        /* Container de Arraste */
         .feed-container { 
             display: flex; 
             flex-direction: row; 
             overflow-x: auto; 
-            padding: 10px 20px 40px 20px; 
+            padding: 10px 20px 30px 20px; 
             gap: 20px; 
             -webkit-overflow-scrolling: touch; 
             cursor: grab;
-            user-select: none;
         }
-        .feed-container:active { cursor: grabbing; }
         .feed-container::-webkit-scrollbar { display: none; }
+        .feed-container:active { cursor: grabbing; }
 
-        .corpo { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
-
-        /* --- ESTILO 1: NOTÍCIAS 24H --- */
-        .card-noticia { 
-            flex: 0 0 300px; 
+        /* --- ESTILO 1: NOTÍCIAS 24H (Cards menores, sem curtidas) --- */
+        .card-24h { 
+            flex: 0 0 280px; 
             background: white; 
-            border-radius: 20px; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12); 
+            border-radius: 18px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08); 
             text-decoration: none; 
             color: #333; 
-            height: 400px; 
+            height: 360px; 
             display: flex; 
             flex-direction: column; 
             border: 1px solid #eee; 
             overflow: hidden; 
         }
-        .thumb-24h { width: 100%; height: 200px; background: #000; overflow: hidden; }
-        .thumb-24h img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .tipo-24h { font-size: 12px; color: #d32f2f; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; }
-        .titulo-24h { font-size: 18px; font-weight: bold; line-height: 1.4; color: #001a33; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+        .thumb-24h { width: 100%; height: 180px; background: #000; overflow: hidden; }
+        .thumb-24h img { width: 100%; height: 100%; object-fit: cover; }
+        .corpo-24h { padding: 15px; flex: 1; }
+        .tipo-24h { font-size: 11px; color: #d32f2f; font-weight: 900; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .titulo-24h { font-size: 16px; font-weight: bold; line-height: 1.3; color: #001a33; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* --- ESTILO 2: DESTAQUES --- */
+        /* --- ESTILO 2: DESTAQUES (Cards maiores, com curtidas) --- */
         .card-destaque { 
-            flex: 0 0 400px; 
+            flex: 0 0 380px; 
             background: white; 
             border-radius: 24px; 
-            box-shadow: 0 12px 30px rgba(0,0,0,0.15); 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12); 
             display: flex; 
             flex-direction: column; 
             border: 1px solid #eee; 
             overflow: hidden; 
-            position: relative;
-            min-height: 540px; 
+            min-height: 500px; 
         }
-        .thumb-dest { width: 100%; height: 300px; background: #000; overflow: hidden; position: relative; }
-        .thumb-dest img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .btn-saiba-mais { 
-            background: #0056e3; color: #ffffff; text-align: center; padding: 10px 20px; border-radius: 8px; 
-            font-size: 13px; font-weight: 800; text-transform: uppercase; text-decoration: none;
-            display: inline-block; margin-bottom: 12px; width: fit-content;
-        }
-        .apresentador { font-size: 16px; color: #1a1a1a; font-weight: 800; margin-bottom: 4px; display: block; }
-        .titulo-dest { font-size: 15px; font-weight: 500; line-height: 1.4; color: #444; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
-        .play-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 86, 227, 0.85); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; z-index: 5; pointer-events: none; }
-        .like-container { display: flex; align-items: center; gap: 8px; margin-bottom: 15px; cursor: pointer; width: fit-content; }
-        .like-btn { font-size: 1.5rem; color: #ccc; transition: 0.2s; }
-        .like-btn.active { color: #d32f2f; transform: scale(1.1); }
-        .like-count { font-size: 14px; color: #444; font-weight: bold; }
+        .thumb-dest { width: 100%; height: 260px; background: #000; position: relative; overflow: hidden; }
+        .thumb-dest img { width: 100%; height: 100%; object-fit: cover; }
+        .play-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 86, 227, 0.8); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 2; }
+        .corpo-dest { padding: 20px; display: flex; flex-direction: column; }
+        .btn-saiba { background: #0056e3; color: #fff; padding: 8px 15px; border-radius: 6px; font-size: 12px; font-weight: 800; text-transform: uppercase; text-decoration: none; width: fit-content; margin-bottom: 10px; }
+        .apresentador { font-size: 15px; font-weight: 800; color: #1a1a1a; margin-bottom: 5px; }
+        .titulo-dest { font-size: 14px; color: #555; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .like-container { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; cursor: pointer; }
+        .like-btn { font-size: 1.4rem; color: #ccc; }
+        .like-btn.active { color: #d32f2f; }
     </style>
 </head>
 <body>
 
+    <!-- MURAL 1: NOTÍCIAS 24H -->
     <div class="mural-titulo">Notícias 24 horas</div>
-    <div id="lista-noticias" class="feed-container"></div>
+    <div id="lista-24h" class="feed-container"></div>
 
-    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+    <hr style="border:0; border-top:1px solid #eee; margin: 10px 0;">
 
+    <!-- MURAL 2: DESTAQUES -->
     <div class="mural-titulo">Destaques da Semana</div>
     <div id="lista-destaques" class="feed-container"></div>
 
     <script>
-        const imgMuralPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
+        const imgPadrao = "https://raw.githubusercontent.com/claudiaartesdigitais-maker/adm-radio/main/mural.png";
 
-        function ativarArraste(id) {
-            const slider = document.getElementById(id);
-            if(!slider) return;
+        // Função para tornar os murais "arrastáveis"
+        function iniciarArraste(id) {
+            const el = document.getElementById(id);
             let isDown = false, startX, scrollLeft;
-            slider.addEventListener('mousedown', (e) => {
-                isDown = true; slider.classList.add('active'); startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft;
-            });
-            slider.addEventListener('mouseleave', () => { isDown = false; });
-            slider.addEventListener('mouseup', () => { isDown = false; });
-            slider.addEventListener('mousemove', (e) => {
-                if(!isDown) return;
-                e.preventDefault();
-                const x = e.pageX - slider.offsetLeft;
-                const walk = (x - startX) * 2;
-                slider.scrollLeft = scrollLeft - walk;
-            });
+            el.addEventListener('mousedown', (e) => { isDown = true; startX = e.pageX - el.offsetLeft; scrollLeft = el.scrollLeft; });
+            el.addEventListener('mouseleave', () => isDown = false);
+            el.addEventListener('mouseup', () => isDown = false);
+            el.addEventListener('mousemove', (e) => { if(!isDown) return; e.preventDefault(); const x = e.pageX - el.offsetLeft; const walk = (x - startX) * 2; el.scrollLeft = scrollLeft - walk; });
         }
 
-        async function carregarNoticias() {
-            const url = "https://script.google.com/macros/s/AKfycbzDw47tgWcwWTiJcsQAD5r6IP9Tjdoum3Ek-5fciKu2fsa1EwHBKUNwHN7s6KQMbUlD/exec";
+        // CARREGAR NOTÍCIAS 24H
+        async function carregar24h() {
+            const url = "https://script.google.com/macros/s/AKfycbzvxO4A4LuJPluxrGANlxSWTWHN3ZxU2UgcveW-3wZaIAUS_xLYrCd1LcGbpjMoc6Wa/exec";
             try {
                 const res = await fetch(url);
                 const dados = await res.json();
-                const container = document.getElementById('lista-noticias');
+                const container = document.getElementById('lista-24h');
                 const agora = new Date().getTime();
+
                 const filtradas = dados.filter(item => item.data && (agora - new Date(item.data).getTime()) < 86400000);
 
-                if (filtradas.length === 0) {
-                    container.innerHTML = "<p style='padding:50px; color:#999; text-align:center; width:100%;'>Sem novidades nas últimas 24h.</p>";
+                if(filtradas.length === 0) {
+                    container.innerHTML = "<p style='padding:40px; color:#999;'>Sem novidades nas últimas 24h.</p>";
                     return;
                 }
 
                 container.innerHTML = filtradas.reverse().map(item => {
                     const link = (item.link || "").trim();
                     const ytMatch = link.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
-                    const ytId = ytMatch ? ytMatch[1] : null;
-                    const imgFinal = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : (item.capa || imgMuralPadrao);
-
+                    const img = ytMatch ? `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg` : (item.capa || imgPadrao);
+                    
                     return `
-                        <a href="${link}" target="_blank" class="card-noticia">
-                            <div class="thumb-24h"><img src="${imgFinal}" onerror="this.src='${imgMuralPadrao}'"></div>
-                            <div class="corpo">
-                                <span class="tipo-24h">⌚ ${(item.tipo || 'Destaque')}</span>
-                                <div class="titulo-24h">${item.titulo || "Sem título"}</div>
+                        <a href="${link}" target="_blank" class="card-24h">
+                            <div class="thumb-24h"><img src="${img}" onerror="this.src='${imgPadrao}'"></div>
+                            <div class="corpo-24h">
+                                <span class="tipo-24h">⌚ ${(item.tipo || 'Notícia')}</span>
+                                <div class="titulo-24h">${item.titulo}</div>
                             </div>
                         </a>`;
                 }).join('');
-                ativarArraste('lista-noticias');
-            } catch (e) { console.error("Erro Notícias:", e); }
+                iniciarArraste('lista-24h');
+            } catch (e) { console.error(e); }
         }
 
+        // CARREGAR DESTAQUES
         async function carregarDestaques() {
-            // URL corrigida para o script de Destaques
-            const url = "https://script.google.com/macros/s/AKfycbxNzDvifH0pv74i5E7BUS-scdfujI7mRLymYcOmCJDN3JH4AeGAThfHZoGDt2xS228zWw/exec?aba=Respostas%20ao%20formul%C3%A1rio%201";
+            const url = "https://script.google.com/macros/s/AKfycbxNzDvifH0pv74i5E7BUS-scdfujI7mRLymYcOmCJDN3JH4AeGAThfHZoGDt2xS228zWw/exec?aba=Respostas ao formulário 1";
             try {
                 const res = await fetch(url);
                 const dados = await res.json();
                 const container = document.getElementById('lista-destaques');
 
-                if (!dados || dados.length === 0) {
-                    container.innerHTML = "<p style='padding:50px; color:#999; text-align:center; width:100%;'>Nenhum destaque encontrado.</p>";
-                    return;
-                }
-
                 container.innerHTML = dados.reverse().slice(0, 15).map(item => {
                     const link = (item.link || "").trim();
-                    const ytMatch = link.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([^#\&\?]*).*/);
-                    const ytId = ytMatch ? ytMatch[1] : null;
-                    const imgUrl = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : (link.match(/[-\w]{25,}/) ? `https://drive.google.com/thumbnail?id=${link.match(/[-\w]{25,}/)[0]}&sz=w800` : imgMuralPadrao);
-                    
+                    const driveId = link.match(/[-\w]{25,}/);
+                    const img = driveId ? `https://drive.google.com/thumbnail?id=${driveId[0]}&sz=w800` : imgPadrao;
+
                     return `
                         <div class="card-destaque">
-                            <a href="${link}" target="_blank" style="text-decoration:none;">
-                                <div class="thumb-dest">
-                                    ${item.tipo?.toUpperCase() === "VIDEO" ? '<div class="play-icon">🔊</div>' : ''}
-                                    <img src="${imgUrl}" onerror="this.src='${imgMuralPadrao}'">
-                                </div>
+                            <a href="${link}" target="_blank" class="thumb-dest">
+                                ${item.tipo?.toUpperCase() === "VIDEO" ? '<div class="play-icon">🔊</div>' : ''}
+                                <img src="${img}" onerror="this.src='${imgPadrao}'">
                             </a>
-                            <div class="corpo">
-                                <div class="like-container" onclick="curtirDestaque(${item.id || item.linha}, this.querySelector('.like-btn'))">
-                                    <span class="like-btn">🤍</span> <span class="like-count">${item.curtidas || 0}</span>
+                            <div class="corpo-dest">
+                                <div class="like-container" onclick="curtir(${item.id || item.linha}, this.querySelector('.like-btn'))">
+                                    <span class="like-btn">🤍</span> <span style="font-weight:bold; font-size:14px;">${item.curtidas || 0}</span>
                                 </div>
-                                <a href="${link}" target="_blank" class="btn-saiba-mais">Saiba mais</a>
+                                <a href="${link}" target="_blank" class="btn-saiba">Saiba mais</a>
                                 <span class="apresentador">${item.apresentador || "Rádio Cotia"}</span>
                                 <div class="titulo-dest">${item.titulo || item.mensagem || "Sem título"}</div>
                             </div>
                         </div>`;
                 }).join('');
-                ativarArraste('lista-destaques');
-            } catch (e) { console.error("Erro Destaques:", e); }
+                iniciarArraste('lista-destaques');
+            } catch (e) { console.error(e); }
         }
 
-        async function curtirDestaque(linha, btn) {
+        async function curtir(linha, btn) {
             if(btn.classList.contains('active')) return;
             btn.classList.add('active'); btn.innerText = "❤️";
-            const count = btn.nextElementSibling;
-            count.innerText = parseInt(count.innerText) + 1;
+            const num = btn.nextElementSibling;
+            num.innerText = parseInt(num.innerText) + 1;
             fetch("https://script.google.com/macros/s/AKfycbxNzDvifH0pv74i5E7BUS-scdfujI7mRLymYcOmCJDN3JH4AeGAThfHZoGDt2xS228zWw/exec", { method: 'POST', mode: 'no-cors', body: JSON.stringify({ linha: linha }) });
         }
 
-        carregarNoticias();
+        carregar24h();
         carregarDestaques();
     </script>
 </body>
